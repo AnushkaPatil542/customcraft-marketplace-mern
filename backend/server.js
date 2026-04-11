@@ -12,7 +12,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const testRoutes = require("./routes/testRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
-const creatorRoutes = require("./routes/creatorroutes");
+const creatorRoutes = require("./routes/creatorRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 

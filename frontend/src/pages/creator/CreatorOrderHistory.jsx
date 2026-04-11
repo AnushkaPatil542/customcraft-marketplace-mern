@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 const CreatorOrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -9,7 +10,7 @@ const CreatorOrderHistory = () => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/orders/creator/history",
+          `${API}/api/orders/creator/history`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

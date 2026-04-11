@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 
 const MyOrders = () => {
@@ -16,7 +17,7 @@ const MyOrders = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:5000/api/orders/${orderId}/select-creator`,
+        `${API}/api/orders/${orderId}/select-creator`,
         { creatorId },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -36,7 +37,7 @@ const MyOrders = () => {
       if (!token) return setMessage("Not authorized");
 
       const res = await axios.get(
-        "http://localhost:5000/api/orders/my",
+        `${API}/api/orders/my`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -55,7 +56,7 @@ const MyOrders = () => {
   const viewPortfolio = async (creatorId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/portfolio/${creatorId}`
+        `${API}/api/portfolio/${creatorId}`
       );
 
       setPortfolioData((prev) => ({
@@ -474,7 +475,7 @@ const MyOrders = () => {
                               {item.images.map((img, i) => (
                                 <img
                                   key={i}
-                                  src={`http://localhost:5000/${img.replace(/\\/g, "/")}`}
+                                  src={`${API}/${img.replace(/\\/g, "/")}`}
                                   alt="portfolio"
                                   className="portfolio-img"
                                 />

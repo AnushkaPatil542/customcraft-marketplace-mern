@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
+import API from "../api";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -11,12 +12,12 @@ function Notifications() {
 
   useEffect(() => {
     // ✅ CREATE SOCKET INSIDE useEffect
-    const socket = io("http://localhost:5000");
+    const socket = io(`${API}`);
 
     const loadNotifications = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/notifications",
+          `${API}/api/notifications`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -51,7 +52,7 @@ function Notifications() {
   const markAsRead = async (id) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/notifications/${id}/read`,
+        `${API}/api/notifications/${id}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

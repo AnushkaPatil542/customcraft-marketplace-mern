@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
+
 
 const AssignedOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -14,7 +16,7 @@ const AssignedOrders = () => {
     const fetchAssignedOrders = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/orders/assigned",
+          `${API}/api/orders/assigned`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -48,7 +50,7 @@ const AssignedOrders = () => {
       }
 
       await axios.post(
-        `http://localhost:5000/api/orders/upload/creator/${orderId}`,
+        `${API}/api/orders/upload/creator/${orderId}`,
         formData,
         {
           headers: {
@@ -77,7 +79,7 @@ const AssignedOrders = () => {
         }
 
         await axios.put(
-          `http://localhost:5000/api/orders/complete/${orderId}`,
+          `${API}/api/orders/complete/${orderId}`,
           {
             price: Number(enteredPrice),
           },
@@ -89,7 +91,7 @@ const AssignedOrders = () => {
         );
       } else {
         await axios.put(
-          `http://localhost:5000/api/orders/${orderId}/status`,
+          `${API}/api/orders/${orderId}/status`,
           { status },
           {
             headers: {

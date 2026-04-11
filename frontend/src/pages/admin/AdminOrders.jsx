@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -20,10 +21,10 @@ function AdminOrders() {
         }
 
         const [ordersRes, creatorsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/admin/orders", {
+          axios.get(`${API}/api/admin/orders`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/admin/creators", {
+          axios.get(`${API}/api/admin/creators`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -66,7 +67,7 @@ function AdminOrders() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/orders/${orderId}/assign`,
+        `${API}/api/admin/orders/${orderId}/assign`,
         { creatorId },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -86,7 +87,7 @@ function AdminOrders() {
   const markAsPaid = async (orderId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/orders/${orderId}/pay`,
+        `${API}/api/admin/orders/${orderId}/pay`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

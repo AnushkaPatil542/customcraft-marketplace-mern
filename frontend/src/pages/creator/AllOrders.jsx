@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 function AllOrders() {
   const [orders, setOrders] = useState([]);
@@ -9,7 +10,7 @@ function AllOrders() {
     const fetchOrders = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/orders/all",
+          `${API}/api/orders/all`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -26,7 +27,7 @@ function AllOrders() {
   const applyOrder = async (id) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/orders/${id}/apply`,
+        `${API}/api/orders/${id}/apply`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

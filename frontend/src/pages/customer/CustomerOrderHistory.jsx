@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 const CustomerOrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -13,7 +14,7 @@ const CustomerOrderHistory = () => {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/orders/customer/history",
+          `${API}/api/orders/customer/history`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -31,7 +32,7 @@ const CustomerOrderHistory = () => {
   const submitReview = async () => {
     try {
       await axios.post(
-        `http://localhost:5000/api/reviews/${selectedOrderId}`,
+        `${API}/api/reviews/${selectedOrderId}`,
         { rating, comment },
         {
           headers: { Authorization: `Bearer ${token}` },

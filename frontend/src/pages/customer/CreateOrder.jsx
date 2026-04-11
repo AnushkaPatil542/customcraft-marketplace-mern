@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
+
 
 function CreateOrder() {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ function CreateOrder() {
 
       // ✅ 1. Create Order
       const res = await axios.post(
-        "http://localhost:5000/api/orders",
+        `${API}/api/orders`,
         { title, description, price: 1000 },
         {
           headers: {
@@ -40,7 +42,7 @@ function CreateOrder() {
         }
 
         await axios.post(
-          `http://localhost:5000/api/orders/upload/customer/${orderId}`,
+          `${API}/api/orders/upload/customer/${orderId}`,
           formData,
           {
             headers: {

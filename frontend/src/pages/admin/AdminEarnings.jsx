@@ -10,6 +10,8 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import API from "../api";
+
 
 const AdminEarnings = () => {
   const [data, setData] = useState({
@@ -28,21 +30,21 @@ const AdminEarnings = () => {
     const fetchAll = async () => {
       try {
         const earningsRes = await axios.get(
-          "http://localhost:5000/api/admin/earnings",
+          `${API}/api/admin/earnings`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         const monthlyRes = await axios.get(
-          "http://localhost:5000/api/admin/monthly-earnings",
+          `${API}/api/admin/monthly-earnings`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         const creatorsRes = await axios.get(
-          "http://localhost:5000/api/admin/top-creators",
+          `${API}/api/admin/top-creators`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

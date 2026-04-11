@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
+
 
 function CreatorReviews() {
   const [reviews, setReviews] = useState([]);
@@ -9,7 +11,7 @@ function CreatorReviews() {
     const fetchReviews = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/reviews/creator", // ✅ FIXED
+          `${API}/api/reviews/creator`, // ✅ FIXED
           {
             headers: { Authorization: `Bearer ${token}` },
           }

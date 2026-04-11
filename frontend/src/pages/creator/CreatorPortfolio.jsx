@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
+
 
 const CreatorPortfolio = () => {
   const [portfolios, setPortfolios] = useState([]);
@@ -9,14 +11,14 @@ const CreatorPortfolio = () => {
   const [isAdding, setIsAdding] = useState(false);
   const token = localStorage.getItem("token");
 
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = `${API}`;
 
   /* 🔹 LOAD PORTFOLIO */
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/portfolio/my",
+          `${API}/api/portfolio/my`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -45,7 +47,7 @@ const CreatorPortfolio = () => {
       }
 
       await axios.post(
-        "http://localhost:5000/api/portfolio/create",
+        `${API}/api/portfolio/create`,
         formData,
         {
           headers: {

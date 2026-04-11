@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 function CreatorDashboard() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function CreatorDashboard() {
     const loadNotifications = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/notifications",
+          `${API}/api/notifications`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 const AppliedOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -11,7 +12,7 @@ const AppliedOrders = () => {
     const fetchAppliedOrders = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/orders/applied",
+          `${API}/api/orders/applied`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

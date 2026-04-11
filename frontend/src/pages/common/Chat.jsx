@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
+import API from "../api";
+
 
 const Chat = () => {
   const { orderId } = useParams();
@@ -20,7 +22,7 @@ const Chat = () => {
 
   /* 🔹 SOCKET CONNECTION */
   useEffect(() => {
-    socket.current = io("http://localhost:5000");
+    socket.current = io(`${API}`);
 
     socket.current.emit("joinRoom", orderId);
 
@@ -47,7 +49,7 @@ const Chat = () => {
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/messages/${orderId}`,
+          `${API}/api/messages/${orderId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -97,7 +99,7 @@ const Chat = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/messages",
+        `${API}/api/messages`,
         {
           orderId,
           text,

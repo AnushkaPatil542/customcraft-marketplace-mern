@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 function AdminCreators() {
   const [creators, setCreators] = useState([]);
@@ -11,7 +12,7 @@ function AdminCreators() {
     const loadCreators = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/admin/creators",
+          `${API}/api/admin/creators`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -34,7 +35,7 @@ function AdminCreators() {
   const viewPortfolio = async (creatorId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/portfolio/${creatorId}`
+        `${API}/api/portfolio/${creatorId}`
       );
 
       setPortfolioData((prev) => ({
@@ -324,10 +325,10 @@ function AdminCreators() {
                               {item.images.map((img, i) => (
                                 <img
                                   key={i}
-                                  src={`http://localhost:5000/${img.replace(/\\/g, "/")}`}
+                                  src={`${API}/${img.replace(/\\/g, "/")}`}
                                   alt={item.title}
                                   className="portfolio-img"
-                                  onClick={() => window.open(`http://localhost:5000/${img.replace(/\\/g, "/")}`, '_blank')}
+                                  onClick={() => window.open(`${API}/${img.replace(/\\/g, "/")}`, '_blank')}
                                 />
                               ))}
                             </div>

@@ -8,6 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import API from "../api";
+
 
 const CreatorEarnings = () => {
   const [data, setData] = useState({
@@ -59,7 +61,7 @@ const CreatorEarnings = () => {
     const fetchEarnings = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/creator/earnings",
+          `${API}/api/creator/earnings`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

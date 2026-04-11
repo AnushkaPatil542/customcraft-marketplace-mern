@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import API from "../api";
-
+import API from "../../api";
 const CustomerOrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [rating, setRating] = useState(5);

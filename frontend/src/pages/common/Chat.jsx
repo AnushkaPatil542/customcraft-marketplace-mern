@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import API from "../api";
-
+import API from "../../api";
 
 const Chat = () => {
   const { orderId } = useParams();

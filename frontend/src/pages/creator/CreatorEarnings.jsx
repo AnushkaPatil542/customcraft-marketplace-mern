@@ -8,8 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import API from "../api";
-
+import API from "../../api";
 
 const CreatorEarnings = () => {
   const [data, setData] = useState({

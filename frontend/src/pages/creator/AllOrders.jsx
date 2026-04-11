@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import API from "../api";
-
+import API from "../../api";
 function AllOrders() {
   const [orders, setOrders] = useState([]);
   const token = localStorage.getItem("token");

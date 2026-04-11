@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import API from "../api";
-
+import API from "../../api";
 function CreatorDashboard() {
   const navigate = useNavigate();
   const name = localStorage.getItem("name");

@@ -10,8 +10,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import API from "../api";
-
+import API from "../../api";
 
 const AdminEarnings = () => {
   const [data, setData] = useState({

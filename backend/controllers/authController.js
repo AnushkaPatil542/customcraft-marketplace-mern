@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// ================= TOKEN =================
 const generateToken = (id, role) => {
   return jwt.sign(
     { id, role },
@@ -12,9 +13,13 @@ const generateToken = (id, role) => {
 
 // ================= REGISTER =================
 exports.register = async (req, res) => {
-  const { name, email, password, role } = req.body;
-
   try {
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -23,19 +28,21 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role,
+      role: role || "USER",
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully",
+      userId: user._id,
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("REGISTER ERROR:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -61,7 +68,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // FIX HERE
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -87,6 +93,7 @@ exports.login = async (req, res) => {
     });
   }
 };
+
 // ================= CREATE ADMIN =================
 exports.createAdmin = async (req, res) => {
   try {
@@ -98,22 +105,21 @@ exports.createAdmin = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash("admin123", 10);
 
-    const admin = new User({
+    const admin = await User.create({
       name: "Admin",
       email: "admin@gmail.com",
       password: hashedPassword,
       role: "ADMIN",
     });
 
-    await admin.save();
-
-    res.status(201).json({
-      message: "Admin created",
+    return res.status(201).json({
+      message: "Admin created successfully",
       email: "admin@gmail.com",
       password: "admin123",
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Error creating admin" });
+    console.error("ADMIN ERROR:", error);
+    return res.status(500).json({ message: "Error creating admin" });
   }
 };

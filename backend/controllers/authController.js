@@ -32,31 +32,28 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "USER",
+      role: role || "customer",
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "User registered successfully",
       userId: user._id,
     });
 
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// ================= LOGIN =================
+// ================= LOGIN (FIXED & SAFE) =================
 exports.login = async (req, res) => {
   try {
-    console.log("LOGIN API HIT");
-    console.log("BODY:", req.body);
-
     const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email or password missing",
+        message: "Email and password required",
       });
     }
 
@@ -68,6 +65,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // 🔥 SAFE PASSWORD CHECK (NO CUSTOM METHOD)
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -80,10 +78,10 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({
       _id: user._id,
-      token,
-      role: user.role,
       name: user.name,
       email: user.email,
+      role: user.role,
+      token,
     });
 
   } catch (error) {
@@ -94,7 +92,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// ================= CREATE ADMIN =================
+// ================= ADMIN =================
 exports.createAdmin = async (req, res) => {
   try {
     const existingAdmin = await User.findOne({ email: "admin@gmail.com" });
@@ -105,21 +103,20 @@ exports.createAdmin = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash("admin123", 10);
 
-    const admin = await User.create({
+    await User.create({
       name: "Admin",
       email: "admin@gmail.com",
       password: hashedPassword,
       role: "ADMIN",
     });
 
-    return res.status(201).json({
-      message: "Admin created successfully",
+    res.status(201).json({
+      message: "Admin created",
       email: "admin@gmail.com",
       password: "admin123",
     });
 
   } catch (error) {
-    console.error("ADMIN ERROR:", error);
-    return res.status(500).json({ message: "Error creating admin" });
+    res.status(500).json({ message: "Error creating admin" });
   }
 };

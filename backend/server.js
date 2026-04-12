@@ -62,10 +62,11 @@ io.on("connection", (socket) => {
 app.use(cors({
   origin: [
     "http://localhost:5173",
-"https://customcraft-marketplace-mern.vercel.app"  ],
+    "https://customcraft-marketplace-mern.vercel.app" ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

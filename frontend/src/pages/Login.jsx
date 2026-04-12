@@ -24,48 +24,47 @@ function Login() {
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setIsLoading(true);
+  e.preventDefault();
+  setMessage("");
+  setIsLoading(true);
 
-    try {
-      const res = await axios.post(`${API}/api/auth/login`,
-        { email, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
+  try {
+    const res = await axios.post(
+      `${API}/api/auth/login`,
+      {
+        email: email.trim(),
+        password: password.trim(),
+      }
+    );
 
-      const role = res.data.role.toLowerCase();
+    const data = res.data;
 
-      // ✅ SAVE EVERYTHING (IMPORTANT FIX)
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", role);
-      localStorage.setItem("name", res.data.name);
-
-      // 🔥 THIS IS THE MOST IMPORTANT LINE
-      localStorage.setItem("user", JSON.stringify(res.data)); 
-      // MUST contain _id
-
-      setMessage("Login successful");
-
-      // ✅ ROLE-BASED REDIRECT
-      setTimeout(() => {
-        if (role === "admin") {
-          navigate("/admin/dashboard", { replace: true });
-        } else if (role === "creator") {
-          navigate("/creator/dashboard", { replace: true });
-        } else {
-          navigate("/customer/dashboard", { replace: true });
-        }
-      }, 500);
-
-    } catch (error) {
-      console.error("LOGIN ERROR:", error);
-      setMessage(error.response?.data?.message || "Login failed");
-    } finally {
-      setIsLoading(false);
+    if (!data?.token) {
+      throw new Error("Invalid response from server");
     }
-  };
 
+    const role = (data.role || "customer").();
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", role);
+    localStorage.setItem("name", data.name || "");
+    localStorage.setItem("user", JSON.stringify(data));
+
+    setMessage("Login successful");
+
+    setTimeout(() => {
+      if (role === "admin") navigate("/admin/dashboard");
+      else if (role === "creator") navigate("/creator/dashboard");
+      else navigate("/customer/dashboard");
+    }, 300);
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+    setMessage(error.response?.data?.message || "Login failed");
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <>
       <style>{`

@@ -61,7 +61,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    const isMatch = await user.matchPassword(password);
+    // FIX HERE
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -71,13 +72,12 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user._id, user.role);
 
-    // 🔥 FINAL FIX HERE
     return res.status(200).json({
-      _id: user._id,        // ✅ VERY IMPORTANT
+      _id: user._id,
       token,
       role: user.role,
       name: user.name,
-      email: user.email,   // optional
+      email: user.email,
     });
 
   } catch (error) {
@@ -87,7 +87,6 @@ exports.login = async (req, res) => {
     });
   }
 };
-
 // ================= CREATE ADMIN =================
 exports.createAdmin = async (req, res) => {
   try {

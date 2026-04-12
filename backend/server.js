@@ -21,35 +21,41 @@ connectDB();
 
 const app = express();
 
+/* ================= MIDDLEWARE ================= */
+
+// ✅ SIMPLE & FINAL CORS FIX
+app.use(cors({
+  origin: "*",   // allow all origins (fixes all CORS issues)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // 🔥 Create HTTP server
 const server = http.createServer(app);
 
 // 🔥 Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "*",   // TEMP allow all (for testing)
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-// 🔥 Make io global (used in notifications also)
+// 🔥 Make io global
 global.io = io;
 
 /* ================= SOCKET.IO ================= */
 io.on("connection", (socket) => {
   console.log("🔥 User connected:", socket.id);
 
-  // ✅ Join room based on orderId
   socket.on("joinRoom", (orderId) => {
     socket.join(orderId);
     console.log("📦 Joined room:", orderId);
   });
 
-  // 💬 REAL-TIME CHAT (ORDER BASED)
   socket.on("sendMessage", ({ orderId, message }) => {
-    console.log("📩 Message:", message);
-
-    // send message to others in same order room
     socket.to(orderId).emit("receiveMessage", message);
   });
 
@@ -57,18 +63,6 @@ io.on("connection", (socket) => {
     console.log("❌ User disconnected:", socket.id);
   });
 });
-
-/* ================= MIDDLEWARE ================= */
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://customcraft-marketplace-mern.vercel.app" ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 /* ================= ROUTES ================= */
 app.use("/api/test", testRoutes);

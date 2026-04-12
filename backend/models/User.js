@@ -12,11 +12,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
 
     password: {
       type: String,
       required: true,
+      minlength: 6,
     },
 
     role: {
@@ -25,7 +28,6 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
-    // ✅ Portfolio reference
     portfolio: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +35,6 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    // ✅ ADD THIS (IMPORTANT for earnings)
     earnings: {
       type: Number,
       default: 0,
@@ -45,10 +46,8 @@ const userSchema = new mongoose.Schema(
 /* 🔐 HASH PASSWORD BEFORE SAVE */
 userSchema.pre("save", async function (next) {
   try {
-    // 👉 Only hash if password is modified
-    if (!this.isModified("password")) {
-      return next();
-    }
+    // Only hash if password changed
+    if (!this.isModified("password")) return next();
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -59,9 +58,6 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-/* 🔐 MATCH PASSWORD */
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
+/* ❌ REMOVE matchPassword (NOT NEEDED ANYMORE) */
 
 module.exports = mongoose.model("User", userSchema);

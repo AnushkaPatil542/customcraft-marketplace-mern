@@ -53,27 +53,35 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(401).json({ msg: "User not found" });
-
-    console.log("INPUT PASSWORD:", password);
-    console.log("DB PASSWORD HASH:", user.password);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    console.log("MATCH RESULT:", isMatch);
-
     if (!isMatch) {
-      return res.status(401).json({ msg: "Password mismatch" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    res.json({ msg: "LOGIN SUCCESS" });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token, // 🔥 IMPORTANT
+    });
 
   } catch (err) {
     console.log(err);
-    res.status(500).json({ msg: "error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
-
 // ================= ADMIN =================
 exports.createAdmin = async (req, res) => {
   try {

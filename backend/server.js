@@ -27,7 +27,7 @@ const server = http.createServer(app);
 // 🔥 Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",   // TEMP allow all (for testing)
     methods: ["GET", "POST"],
   },
 });
@@ -60,7 +60,8 @@ io.on("connection", (socket) => {
 
 /* ================= MIDDLEWARE ================= */
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 app.use(express.json());

@@ -44,20 +44,16 @@ const userSchema = new mongoose.Schema(
 );
 
 /* 🔐 HASH PASSWORD BEFORE SAVE */
+const bcrypt = require("bcryptjs");
+
 userSchema.pre("save", async function (next) {
-  try {
-    // Only hash if password changed
-    if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return next();
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 
-    next();
-  } catch (error) {
-    next(error);
-  }
+  next();
 });
-
 /* ❌ REMOVE matchPassword (NOT NEEDED ANYMORE) */
 
 module.exports = mongoose.model("User", userSchema);

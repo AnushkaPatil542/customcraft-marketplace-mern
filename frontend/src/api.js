@@ -1,3 +1,3 @@
-const API = "https://customcraft-backend-l9ir.onrender.com/api";
+const API = "https://customcraft-marketplace-mern.onrender.com";
 
 export default API;

@@ -430,7 +430,7 @@ const CreatorPortfolio = () => {
                   )}
                 </div>
 
-                <button type="submit" className="submit-btn" disabled={isAdding}>
+                <button type="submit" className="submit-btn" >
                   {isAdding ? "📤 Publishing..." : "➕ Publish to Portfolio"}
                 </button>
               </form>

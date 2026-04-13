@@ -43,21 +43,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* 🔐 HASH PASSWORD BEFORE SAVE */
-userSchema.pre("save", async function (next) {
-  try {
-    // Only hash if password changed
-    if (!this.isModified("password")) return next();
+/* 🔐 HASH PASSWORD BEFORE SAVE (FINAL FIX) */
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-
-    next();
-  } catch (error) {
-    next(error);
-  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
-
-/* ❌ REMOVE matchPassword (NOT NEEDED ANYMORE) */
 
 module.exports = mongoose.model("User", userSchema);

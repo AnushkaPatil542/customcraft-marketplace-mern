@@ -8,33 +8,54 @@ const CreatorPortfolio = () => {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const token = localStorage.getItem("token");
 
-  const BASE_URL = `${API}`;
-
-  /* 🔹 LOAD PORTFOLIO */
+  /* ================= FETCH PORTFOLIO ================= */
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        const res = await axios.get(
-          `${API}/api/portfolio/my`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await axios.get(`${API}/api/portfolio/my`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setPortfolios(res.data);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchPortfolio();
+    if (token) fetchPortfolio();
   }, [token]);
 
-  /* 🔹 ADD PORTFOLIO */
+  /* ================= HANDLE FILE SELECTION ================= */
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+
+    // Create preview URLs
+    const previews = selectedFiles.map(file => URL.createObjectURL(file));
+    setFilePreviews(previews);
+  };
+
+  /* ================= REMOVE FILE ================= */
+  const removeFile = (index) => {
+    const newFiles = files.filter((_, i) => i !== index);
+    const newPreviews = filePreviews.filter((_, i) => i !== index);
+    
+    // Revoke the URL to avoid memory leaks
+    URL.revokeObjectURL(filePreviews[index]);
+    
+    setFiles(newFiles);
+    setFilePreviews(newPreviews);
+  };
+
+  /* ================= ADD PORTFOLIO ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsAdding(true);
+    setLoading(true);
 
     try {
       const formData = new FormData();
@@ -45,7 +66,7 @@ const CreatorPortfolio = () => {
         formData.append("files", files[i]);
       }
 
-      await axios.post(
+      const res = await axios.post(
         `${API}/api/portfolio/create`,
         formData,
         {
@@ -56,19 +77,39 @@ const CreatorPortfolio = () => {
         }
       );
 
+      // ✅ Update UI instantly
+      setPortfolios((prev) => [res.data, ...prev]);
+
       alert("✅ Portfolio added successfully!");
 
+      // reset
       setTitle("");
       setDescription("");
       setFiles([]);
+      setFilePreviews([]);
+      setIsAdding(false);
 
-      // 🔁 reload after upload
-      window.location.reload();
     } catch (error) {
       console.error(error);
       alert("❌ Failed to add portfolio");
     } finally {
-      setIsAdding(false);
+      setLoading(false);
+    }
+  };
+
+  /* ================= DELETE PORTFOLIO ================= */
+  const deletePortfolio = async (id) => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      try {
+        await axios.delete(`${API}/api/portfolio/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPortfolios(portfolios.filter(item => item._id !== id));
+        alert("✅ Deleted successfully");
+      } catch (error) {
+        console.error(error);
+        alert("❌ Failed to delete");
+      }
     }
   };
 
@@ -200,9 +241,67 @@ const CreatorPortfolio = () => {
           min-height: 100px;
         }
 
-        .file-input {
-          padding: 0.7rem !important;
+        /* File previews */
+        .file-previews {
+          margin-top: 0.75rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
+        .preview-item {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          border-radius: 0.75rem;
+          overflow: hidden;
+          border: 2px solid #e5e7eb;
+          transition: all 0.2s ease;
+        }
+
+        .preview-item:hover {
+          border-color: #ef4444;
+        }
+
+        .preview-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .remove-file {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          width: 20px;
+          height: 20px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 50%;
           cursor: pointer;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+
+        .remove-file:hover {
+          transform: scale(1.1);
+          background: #dc2626;
+        }
+
+        .file-count {
+          font-size: 0.75rem;
+          color: #22c55e;
+          margin-top: 0.5rem;
+        }
+
+        .file-input {
+          padding: 0.7rem;
+          cursor: pointer;
+          background: #f9fafb;
         }
 
         .submit-btn {
@@ -231,7 +330,7 @@ const CreatorPortfolio = () => {
         /* Portfolio Grid */
         .portfolio-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
           gap: 1.5rem;
           margin-top: 1rem;
         }
@@ -244,6 +343,7 @@ const CreatorPortfolio = () => {
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
           border: 1px solid rgba(34, 197, 94, 0.1);
+          position: relative;
         }
 
         .portfolio-card:hover {
@@ -251,7 +351,37 @@ const CreatorPortfolio = () => {
           box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
         }
 
-        /* Image Gallery - FIXED: Proper image display */
+        /* Delete button */
+        .delete-btn {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: rgba(239, 68, 68, 0.9);
+          color: white;
+          border: none;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          z-index: 10;
+          opacity: 0;
+        }
+
+        .portfolio-card:hover .delete-btn {
+          opacity: 1;
+        }
+
+        .delete-btn:hover {
+          background: #ef4444;
+          transform: scale(1.1);
+        }
+
+        /* Image Gallery */
         .image-gallery {
           display: flex;
           flex-direction: column;
@@ -265,29 +395,24 @@ const CreatorPortfolio = () => {
           background: #e5e7eb;
           border-radius: 0.75rem;
           overflow: hidden;
+          cursor: pointer;
         }
 
         .portfolio-image {
           width: 100%;
           height: auto;
           display: block;
-          transition: transform 0.2s ease;
-          cursor: pointer;
+          transition: transform 0.3s ease;
         }
 
         .portfolio-image:hover {
-          transform: scale(1.02);
+          transform: scale(1.05);
         }
 
-        /* For multiple images - grid layout */
         .image-gallery.multiple {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
           gap: 0.75rem;
-        }
-
-        .image-gallery.multiple .portfolio-image-wrapper {
-          width: 100%;
         }
 
         /* Card Content */
@@ -311,6 +436,37 @@ const CreatorPortfolio = () => {
           line-height: 1.4;
         }
 
+        /* Image Modal */
+        .image-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          cursor: pointer;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .modal-image {
+          max-width: 90%;
+          max-height: 90%;
+          border-radius: 0.5rem;
+        }
+
+        .close-modal {
+          position: absolute;
+          top: 1rem;
+          right: 2rem;
+          color: white;
+          font-size: 2rem;
+          cursor: pointer;
+        }
+
         /* No Portfolio */
         .no-portfolio {
           text-align: center;
@@ -320,6 +476,11 @@ const CreatorPortfolio = () => {
           color: #6b7280;
           font-size: 1.1rem;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         /* Responsive */
@@ -333,7 +494,7 @@ const CreatorPortfolio = () => {
           }
           
           .portfolio-grid {
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           }
         }
 
@@ -358,49 +519,33 @@ const CreatorPortfolio = () => {
             grid-template-columns: 1fr;
           }
         }
-
-        /* Animation */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .portfolio-card {
-          animation: fadeInUp 0.4s ease-out;
-        }
       `}</style>
 
       <div className="portfolio-wrapper">
         <div className="portfolio-container">
           <h2>🎨 My Creative Portfolio</h2>
 
-          {/* 🔹 ADD TOGGLE BUTTON */}
-          <button 
+          {/* 🔹 TOGGLE BUTTON */}
+          <button
             className="add-toggle-btn"
             onClick={() => setIsAdding(!isAdding)}
           >
             {isAdding ? "− Cancel" : "+ Add New Work"}
-            {isAdding && files.length > 0 && ` (${files.length} files selected)`}
           </button>
 
           {/* 🔹 FORM */}
           {isAdding && (
             <div className="form-container">
               <h3 className="form-title">✨ Showcase Your Talent</h3>
+
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label>Work Title</label>
                   <input
                     type="text"
-                    placeholder="e.g., Custom Logo Design, Handmade Saree, Portrait Art..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Custom Logo Design, Handmade Saree"
                     required
                   />
                 </div>
@@ -408,9 +553,9 @@ const CreatorPortfolio = () => {
                 <div className="form-group">
                   <label>Description</label>
                   <textarea
-                    placeholder="Describe your creative process, materials used, or unique features..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe your creative process, materials used, or unique features..."
                   />
                 </div>
 
@@ -421,23 +566,44 @@ const CreatorPortfolio = () => {
                     multiple
                     accept="image/*"
                     className="file-input"
-                    onChange={(e) => setFiles(e.target.files)}
+                    onChange={handleFileChange}
                   />
+                  
                   {files.length > 0 && (
-                    <small style={{ color: "#22c55e", marginTop: "0.5rem", display: "block" }}>
-                      ✓ {files.length} file(s) selected
-                    </small>
+                    <>
+                      <div className="file-previews">
+                        {filePreviews.map((preview, index) => (
+                          <div key={index} className="preview-item">
+                            <img src={preview} alt={`Preview ${index + 1}`} className="preview-image" />
+                            <button
+                              type="button"
+                              className="remove-file"
+                              onClick={() => removeFile(index)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="file-count">
+                        ✓ {files.length} file(s) selected
+                      </div>
+                    </>
                   )}
                 </div>
 
-                <button type="submit" className="submit-btn" >
-                  {isAdding ? "📤 Publishing..." : "➕ Publish to Portfolio"}
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={loading || files.length === 0}
+                >
+                  {loading ? "📤 Publishing..." : "➕ Publish to Portfolio"}
                 </button>
               </form>
             </div>
           )}
 
-          {/* 🔹 DISPLAY PORTFOLIO */}
+          {/* 🔹 DISPLAY */}
           {portfolios.length === 0 ? (
             <div className="no-portfolio">
               🎨 No portfolio yet
@@ -450,19 +616,27 @@ const CreatorPortfolio = () => {
             <div className="portfolio-grid">
               {portfolios.map((item) => (
                 <div className="portfolio-card" key={item._id}>
-                  <div className={`image-gallery ${item.images.length > 1 ? 'multiple' : ''}`}>
-                    {item.images.map((img, i) => (
+                  <button
+                    className="delete-btn"
+                    onClick={() => deletePortfolio(item._id)}
+                    title="Delete"
+                  >
+                    ×
+                  </button>
+                  
+                  <div className={`image-gallery ${item.images?.length > 1 ? "multiple" : ""}`}>
+                    {item.images?.map((img, i) => (
                       <div key={i} className="portfolio-image-wrapper">
                         <img
-                          src={`${BASE_URL}/${img}`}
-                          alt={`${item.title} - Image ${i + 1}`}
+                          src={img}
+                          alt={item.title}
                           className="portfolio-image"
-                          onClick={() => window.open(`${BASE_URL}/${img}`, '_blank')}
-                          loading="lazy"
+                          onClick={() => setSelectedImage(img)}
                         />
                       </div>
                     ))}
                   </div>
+
                   <div className="card-content">
                     <h3>{item.title}</h3>
                     <p>{item.description || "No description provided"}</p>
@@ -473,6 +647,14 @@ const CreatorPortfolio = () => {
           )}
         </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="image-modal" onClick={() => setSelectedImage(null)}>
+          <span className="close-modal" onClick={() => setSelectedImage(null)}>×</span>
+          <img src={selectedImage} alt="Full size" className="modal-image" />
+        </div>
+      )}
     </>
   );
 };

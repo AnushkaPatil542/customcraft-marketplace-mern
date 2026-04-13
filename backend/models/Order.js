@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema(
       default: "PENDING",
     },
 
-    // 💰 Payment & Earnings
+    /* ================= PAYMENT ================= */
     paymentMethod: {
       type: String,
       enum: ["COD"],
@@ -74,18 +74,16 @@ const orderSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // 📁 FILE UPLOAD (NEW FEATURE)
-    customerFiles: [
-      {
-        type: String,
-      },
-    ],
+    /* ================= FILES ================= */
+    customerFiles: {
+      type: [String],
+      default: [],
+    },
 
-    creatorFiles: [
-      {
-        type: String,
-      },
-    ],
+    creatorFiles: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

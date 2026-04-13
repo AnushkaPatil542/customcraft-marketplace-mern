@@ -373,13 +373,13 @@ global.io.to(order.customer.toString()).emit("notification", notification);
 });
 
 /* ================= CUSTOMER UPLOAD ================= */
-  router.post(
+router.post(
   "/upload/customer/:orderId",
   protect,
   upload.array("files"),
   async (req, res) => {
     try {
-      console.log("📂 Files:", req.files);
+      console.log("📂 CUSTOMER FILES:", req.files);
 
       const order = await Order.findById(req.params.orderId);
 
@@ -391,27 +391,21 @@ global.io.to(order.customer.toString()).emit("notification", notification);
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // ✅ IMPORTANT FIX: DO NOT UPLOAD AGAIN
+      // ✅ Cloudinary URLs already handled by multer-storage-cloudinary
       const imageUrls = req.files.map(file => file.path);
 
-      if (!order.referenceImages) {
-        order.referenceImages = [];
-      }
-
-      order.referenceImages.push(...imageUrls);
+      order.customerFiles.push(...imageUrls);
 
       await order.save();
 
       res.json({
-        message: "Customer files uploaded",
+        message: "Customer upload success",
         files: imageUrls,
       });
 
     } catch (err) {
-      console.error("🔥 CUSTOMER ERROR:", err);
-      res.status(500).json({
-        message: err.message,
-      });
+      console.error("🔥 CUSTOMER UPLOAD ERROR:", err);
+      res.status(500).json({ message: err.message });
     }
   }
 );
@@ -422,7 +416,7 @@ router.post(
   upload.array("files"),
   async (req, res) => {
     try {
-      console.log("📂 Files:", req.files);
+      console.log("FILES:", req.files);
 
       const order = await Order.findById(req.params.orderId);
 
@@ -434,26 +428,21 @@ router.post(
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // ✅ IMPORTANT FIX
       const imageUrls = req.files.map(file => file.path);
 
-      if (!order.customerFiles) {
-        order.customerFiles = [];
-      }
-
-      order.customerFiles.push(...imageUrls);
+      order.creatorFiles.push(...imageUrls);
 
       await order.save();
 
       res.json({
-        message: "Creator files uploaded",
+        message: "Creator upload success",
         files: imageUrls,
       });
 
-    } catch (err) {
-      console.error("🔥 CREATOR ERROR:", err);
+    } catch (error) {
+      console.error("🔥 CREATOR UPLOAD ERROR:", error);
       res.status(500).json({
-        message: err.message,
+        message: error.message,
       });
     }
   }

@@ -371,35 +371,35 @@ global.io.to(order.customer.toString()).emit("notification", notification);
   }
 });
 
-router.post("/upload/customer/:id",
-  protect,
+router.post(
+  "/upload/customer/:orderId",
   upload.array("files"),
   async (req, res) => {
     try {
-      const order = await Order.findById(req.params.id);
+      const { orderId } = req.params;
 
+      const order = await Order.findById(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
 
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: "No files uploaded" });
+      const imageUrls = [];
+
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path);
+        imageUrls.push(result.secure_url);
       }
 
-      const filePaths = req.files.map(file => file.path || file.secure_url);
-
-      order.customerFiles.push(...filePaths);
+      order.referenceImages = imageUrls;
       await order.save();
 
-      res.json({ message: "Files uploaded", files: filePaths });
-
-    } catch (error) {
-      console.error("UPLOAD ERROR:", error);
-      res.status(500).json({ message: error.message });
+      res.json(order);
+    } catch (err) {
+      console.error(err); // 🔥 MUST HAVE
+      res.status(500).json({ message: "Upload failed" });
     }
   }
 );
-
 router.post("/upload/creator/:id",
   protect,
   upload.array("files"),

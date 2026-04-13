@@ -378,9 +378,15 @@ router.post(
   async (req, res) => {
     try {
       const order = await Order.findById(req.params.id);
+      if (!order) {
+  return res.status(404).json({ message: "Order not found" });
+}
 
-      const filePaths = req.files.map(file => file.path);
+if (!req.files || req.files.length === 0) {
+  return res.status(400).json({ message: "No files uploaded" });
+}
 
+const filePaths = req.files.map(file => file.path || file.secure_url);
       order.customerFiles.push(...filePaths);
       await order.save();
 
@@ -399,9 +405,15 @@ router.post(
   async (req, res) => {
     try {
       const order = await Order.findById(req.params.id);
+      if (!order) {
+  return res.status(404).json({ message: "Order not found" });
+}
 
-      const filePaths = req.files.map(file => file.path);
+if (!req.files || req.files.length === 0) {
+  return res.status(400).json({ message: "No files uploaded" });
+}
 
+const filePaths = req.files.map(file => file.path || file.secure_url);
       order.creatorFiles.push(...filePaths);
       await order.save();
 

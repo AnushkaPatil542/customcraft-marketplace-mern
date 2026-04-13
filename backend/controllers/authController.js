@@ -39,9 +39,9 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
+  console.error("REGISTER ERROR:", error); // 🔥 IMPORTANT
+  res.status(500).json({ message: error.message });
+}
 };
 // ================= LOGIN (FIXED & SAFE) =================
 exports.login = async (req, res) => {

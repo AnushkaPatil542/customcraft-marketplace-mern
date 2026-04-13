@@ -76,6 +76,12 @@ app.use("/api/creator", creatorRoutes);
 app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use((err, req, res, next) => {
+  console.error("🔥 SERVER ERROR:", err.stack);
+  res.status(500).json({
+    message: err.message || "Internal Server Error",
+  });
+});
 
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 5000;

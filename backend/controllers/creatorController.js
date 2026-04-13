@@ -30,16 +30,17 @@ const getCreatorEarnings = async (req, res) => {
 /* ================= UPLOAD WORK ================= */
 const uploadWork = async (req, res) => {
   try {
-    console.log("FILE:", req.file); // 🔥 debug
+    console.log("FILE:", req.file); // debug
 
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // you can also save this in DB later
     res.status(200).json({
       message: "File uploaded successfully",
-      file: req.file.filename
+
+      // ✅ THIS IS THE MAIN FIX
+      fileUrl: req.file.path
     });
 
   } catch (error) {
@@ -47,5 +48,4 @@ const uploadWork = async (req, res) => {
     res.status(500).json({ message: "File upload failed" });
   }
 };
-
 module.exports = { getCreatorEarnings, uploadWork };

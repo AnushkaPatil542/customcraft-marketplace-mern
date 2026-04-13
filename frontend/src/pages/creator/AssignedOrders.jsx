@@ -7,22 +7,19 @@ const AssignedOrders = () => {
   const [orders, setOrders] = useState([]);
   const [price, setPrice] = useState({});
   const [files, setFiles] = useState({});
+  const [uploading, setUploading] = useState({});
   const token = localStorage.getItem("token");
 
   const navigate = useNavigate();
 
+  /* ================= FETCH ORDERS ================= */
   useEffect(() => {
     const fetchAssignedOrders = async () => {
       try {
-        const response = await axios.get(
-          `${API}/api/orders/assigned`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setOrders(response.data);
+        const res = await axios.get(`${API}/api/orders/assigned`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOrders(res.data);
       } catch (error) {
         console.error(error);
         alert("Failed to load assigned orders");
@@ -32,7 +29,7 @@ const AssignedOrders = () => {
     if (token) fetchAssignedOrders();
   }, [token]);
 
-  /* 🔹 UPLOAD FILES */
+  /* ================= UPLOAD FILES ================= */
   const uploadFiles = async (orderId) => {
     try {
       const selectedFiles = files[orderId];
@@ -42,13 +39,15 @@ const AssignedOrders = () => {
         return;
       }
 
+      setUploading(prev => ({ ...prev, [orderId]: true }));
+
       const formData = new FormData();
 
       for (let i = 0; i < selectedFiles.length; i++) {
         formData.append("files", selectedFiles[i]);
       }
 
-      await axios.post(
+      const res = await axios.post(
         `${API}/api/orders/upload/creator/${orderId}`,
         formData,
         {
@@ -59,14 +58,31 @@ const AssignedOrders = () => {
         }
       );
 
+      // ✅ UPDATE UI WITH NEW IMAGES
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId
+            ? {
+                ...o,
+                files: [...(o.files || []), ...res.data.fileUrls],
+              }
+            : o
+        )
+      );
+
+      // Clear selected files for this order
+      setFiles(prev => ({ ...prev, [orderId]: null }));
+
       alert("✅ Files uploaded successfully");
     } catch (error) {
       console.error(error);
       alert("❌ File upload failed");
+    } finally {
+      setUploading(prev => ({ ...prev, [orderId]: false }));
     }
   };
 
-  /* 🔹 UPDATE STATUS */
+  /* ================= UPDATE STATUS ================= */
   const updateStatus = async (orderId, status) => {
     try {
       if (status === "COMPLETED") {
@@ -79,13 +95,9 @@ const AssignedOrders = () => {
 
         await axios.put(
           `${API}/api/orders/complete/${orderId}`,
+          { price: Number(enteredPrice) },
           {
-            price: Number(enteredPrice),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
       } else {
@@ -93,14 +105,12 @@ const AssignedOrders = () => {
           `${API}/api/orders/${orderId}/status`,
           { status },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
       }
 
-      // ✅ FIXED UI UPDATE (no forced COMPLETED)
+      // ✅ UPDATE UI
       setOrders((prev) =>
         prev.map((o) =>
           o._id === orderId
@@ -117,6 +127,25 @@ const AssignedOrders = () => {
     } catch (error) {
       console.log("ERROR:", error.response?.data || error.message);
       alert("Failed to update order status");
+    }
+  };
+
+  // Get status color
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'assigned': return '#3b82f6';
+      case 'in_progress': return '#8b5cf6';
+      case 'completed': return '#22c55e';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusBgColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'assigned': return '#dbeafe';
+      case 'in_progress': return '#ede9fe';
+      case 'completed': return '#dcfce7';
+      default: return '#f3f4f6';
     }
   };
 
@@ -145,7 +174,7 @@ const AssignedOrders = () => {
 
         /* Wide container */
         .assigned-container {
-          width: 90%;
+          width: 95%;
           max-width: 1200px;
           margin: 0 auto;
         }
@@ -206,6 +235,41 @@ const AssignedOrders = () => {
           border-bottom: 1px solid #e5e7eb;
         }
 
+        /* Uploaded images section */
+        .uploaded-images {
+          margin: 1rem 0;
+          padding: 0.75rem;
+          background: #f9fafb;
+          border-radius: 0.75rem;
+        }
+
+        .uploaded-images h4 {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin-bottom: 0.5rem;
+        }
+
+        .images-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+          gap: 0.5rem;
+        }
+
+        .work-image {
+          width: 100%;
+          height: 80px;
+          object-fit: cover;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+          border: 2px solid #e5e7eb;
+        }
+
+        .work-image:hover {
+          transform: scale(1.05);
+          border-color: #22c55e;
+        }
+
         /* Customer info */
         .customer-info {
           background: #f9fafb;
@@ -234,21 +298,6 @@ const AssignedOrders = () => {
           margin-bottom: 1rem;
         }
 
-        .status-assigned {
-          background: #dbeafe;
-          color: #2563eb;
-        }
-
-        .status-in_progress {
-          background: #fef3c7;
-          color: #d97706;
-        }
-
-        .status-completed {
-          background: #dcfce7;
-          color: #16a34a;
-        }
-
         /* Chat button */
         .chat-btn {
           background: linear-gradient(125deg, #8b5cf6, #7c3aed);
@@ -259,11 +308,12 @@ const AssignedOrders = () => {
           cursor: pointer;
           font-weight: 600;
           transition: all 0.2s ease;
+          width: 100%;
           margin-bottom: 1rem;
         }
 
         .chat-btn:hover {
-          transform: translateY(-1px);
+          transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
@@ -273,16 +323,15 @@ const AssignedOrders = () => {
           flex-wrap: wrap;
           gap: 0.75rem;
           margin-top: 1rem;
-          align-items: center;
         }
 
         /* Input fields */
         .price-input {
+          flex: 1;
           padding: 0.6rem 0.75rem;
           border: 2px solid #e5e7eb;
           border-radius: 0.75rem;
           font-size: 0.9rem;
-          width: 120px;
           transition: all 0.2s ease;
         }
 
@@ -293,6 +342,7 @@ const AssignedOrders = () => {
         }
 
         .file-input {
+          flex: 1;
           padding: 0.5rem;
           border: 2px solid #e5e7eb;
           border-radius: 0.75rem;
@@ -306,6 +356,7 @@ const AssignedOrders = () => {
 
         /* Buttons */
         .start-btn {
+          flex: 1;
           background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border: none;
@@ -317,11 +368,12 @@ const AssignedOrders = () => {
         }
 
         .start-btn:hover {
-          transform: translateY(-1px);
+          transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
         .upload-btn {
+          flex: 1;
           background: linear-gradient(125deg, #0ea5e9, #0284c7);
           color: white;
           border: none;
@@ -332,12 +384,18 @@ const AssignedOrders = () => {
           transition: all 0.2s ease;
         }
 
-        .upload-btn:hover {
-          transform: translateY(-1px);
+        .upload-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
+        .upload-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
         .complete-btn {
+          flex: 1;
           background: linear-gradient(125deg, #eab308, #ca8a04);
           color: white;
           border: none;
@@ -348,14 +406,9 @@ const AssignedOrders = () => {
           transition: all 0.2s ease;
         }
 
-        .complete-btn:hover:not(:disabled) {
-          transform: translateY(-1px);
+        .complete-btn:hover {
+          transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
-        }
-
-        .complete-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
         }
 
         /* No orders */
@@ -369,14 +422,26 @@ const AssignedOrders = () => {
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
+        /* Loading spinner inside button */
+        .spinner-small {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border: 2px solid white;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+          margin-right: 6px;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
           .assigned-wrapper {
             padding: 1.5rem;
-          }
-          
-          .assigned-container {
-            width: 95%;
           }
           
           .assigned-container h2 {
@@ -407,7 +472,6 @@ const AssignedOrders = () => {
           
           .action-buttons {
             flex-direction: column;
-            align-items: stretch;
           }
           
           .price-input, .file-input {
@@ -420,7 +484,7 @@ const AssignedOrders = () => {
         }
 
         /* Animation */
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
           from {
             opacity: 0;
             transform: translateY(20px);
@@ -432,7 +496,7 @@ const AssignedOrders = () => {
         }
 
         .order-card {
-          animation: fadeIn 0.3s ease-out;
+          animation: fadeInUp 0.4s ease-out;
         }
       `}</style>
 
@@ -455,20 +519,46 @@ const AssignedOrders = () => {
                   <h3>{order.title}</h3>
                   <p className="order-description">{order.description}</p>
 
+                  {/* ✅ SHOW UPLOADED IMAGES */}
+                  {order.files && order.files.length > 0 && (
+                    <div className="uploaded-images">
+                      <h4>📷 Uploaded Work</h4>
+                      <div className="images-grid">
+                        {order.files.map((file, index) => (
+                          <img
+                            key={index}
+                            src={file}
+                            alt={`Work ${index + 1}`}
+                            className="work-image"
+                            onClick={() => window.open(file, '_blank')}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="customer-info">
                     <p>
-                      <strong>👤 Customer:</strong> {order.customer?.name || "N/A"}
+                      <strong>👤 Customer:</strong>{" "}
+                      {order.customer?.name || "N/A"}
                     </p>
                     <p>
-                      <strong>📧 Email:</strong> {order.customer?.email || "N/A"}
+                      <strong>📧 Email:</strong>{" "}
+                      {order.customer?.email || "N/A"}
                     </p>
                   </div>
 
-                  <span className={`status-badge status-${order.status?.toLowerCase().replace('_', '_') || 'assigned'}`}>
+                  <span 
+                    className="status-badge"
+                    style={{
+                      background: getStatusBgColor(order.status),
+                      color: getStatusColor(order.status)
+                    }}
+                  >
                     Status: {order.status || "ASSIGNED"}
                   </span>
 
-                  {/* 🔥 CHAT BUTTON */}
+                  {/* CHAT */}
                   {order.status !== "PENDING" && (
                     <button
                       onClick={() => navigate(`/chat/${order._id}`)}
@@ -479,11 +569,13 @@ const AssignedOrders = () => {
                   )}
 
                   <div className="action-buttons">
-                    {/* START ORDER */}
+                    {/* START */}
                     {order.status === "ASSIGNED" && (
                       <button
                         className="start-btn"
-                        onClick={() => updateStatus(order._id, "IN_PROGRESS")}
+                        onClick={() =>
+                          updateStatus(order._id, "IN_PROGRESS")
+                        }
                       >
                         🚀 Start Order
                       </button>
@@ -494,7 +586,7 @@ const AssignedOrders = () => {
                       <>
                         <input
                           type="number"
-                          placeholder="Enter price ₹"
+                          placeholder="💰 Enter price ₹"
                           className="price-input"
                           value={price[order._id] || ""}
                           onChange={(e) =>
@@ -520,14 +612,23 @@ const AssignedOrders = () => {
                         <button
                           className="upload-btn"
                           onClick={() => uploadFiles(order._id)}
+                          disabled={uploading[order._id]}
                         >
-                          📁 Upload Work
+                          {uploading[order._id] ? (
+                            <>
+                              <span className="spinner-small"></span>
+                              Uploading...
+                            </>
+                          ) : (
+                            "📁 Upload Work"
+                          )}
                         </button>
 
                         <button
                           className="complete-btn"
-                          disabled={order.status === "COMPLETED"}
-                          onClick={() => updateStatus(order._id, "COMPLETED")}
+                          onClick={() =>
+                            updateStatus(order._id, "COMPLETED")
+                          }
                         >
                           ✅ Complete Order
                         </button>

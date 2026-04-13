@@ -1,7 +1,7 @@
 const express = require("express");
 const { getCreatorEarnings, uploadWork } = require("../controllers/creatorController");
 const { protect, creatorOnly } = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middleware/upload");
 
 const router = express.Router();
 

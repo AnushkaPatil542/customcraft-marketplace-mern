@@ -5,7 +5,7 @@ const User = require("../models/User");
 const Order = require("../models/Order");
 const Notification = require("../models/Notification");
 const { protect,creatorOnly} = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middleware/upload");
 
 /* ================= TEST AUTH ================= */
 

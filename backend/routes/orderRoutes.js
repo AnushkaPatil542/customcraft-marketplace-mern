@@ -6,8 +6,7 @@ const Order = require("../models/Order");
 const Notification = require("../models/Notification");
 const { protect,creatorOnly} = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
-const cloudinary = require("../utils/cloudinary");
-
+const cloudinary = require("../config/cloudinary");
 
 /* ================= TEST AUTH ================= */
 

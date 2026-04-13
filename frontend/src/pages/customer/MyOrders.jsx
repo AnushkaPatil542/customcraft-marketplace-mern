@@ -474,7 +474,7 @@ const MyOrders = () => {
                               {item.images.map((img, i) => (
                                 <img
                                   key={i}
-                                  src={`${API}/${img.replace(/\\/g, "/")}`}
+src={img.startsWith("http") ? img : `${API}/${img}`}
                                   alt="portfolio"
                                   className="portfolio-img"
                                 />

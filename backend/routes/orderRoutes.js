@@ -6,6 +6,8 @@ const Order = require("../models/Order");
 const Notification = require("../models/Notification");
 const { protect,creatorOnly} = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
+const cloudinary = require("../utils/cloudinary");
+
 
 /* ================= TEST AUTH ================= */
 
@@ -371,45 +373,18 @@ global.io.to(order.customer.toString()).emit("notification", notification);
   }
 });
 
+/* ================= CUSTOMER UPLOAD ================= */
 router.post(
   "/upload/customer/:orderId",
-  upload.array("files"),
-  async (req, res) => {
-    try {
-      const { orderId } = req.params;
-
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return res.status(404).json({ message: "Order not found" });
-      }
-
-      const imageUrls = [];
-
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path);
-        imageUrls.push(result.secure_url);
-      }
-
-      order.referenceImages = imageUrls;
-      await order.save();
-
-      res.json(order);
-    } catch (err) {
-      console.error(err); // 🔥 MUST HAVE
-      res.status(500).json({ message: "Upload failed" });
-    }
-  }
-);
-router.post(
-  "/upload/creator/:id",
   protect,
   upload.array("files"),
   async (req, res) => {
     try {
-      console.log("FILES RECEIVED:", req.files);
+      console.log("📂 Customer Files:", req.files);
 
-      const order = await Order.findById(req.params.id);
+      const { orderId } = req.params;
 
+      const order = await Order.findById(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
@@ -418,34 +393,83 @@ router.post(
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      const filePaths = [];
+      const imageUrls = [];
 
+      // ✅ Upload to Cloudinary
       for (const file of req.files) {
-        // ✅ if using local storage
-        if (file.path) {
-          filePaths.push(file.path);
-        }
-
-        // ❌ remove this (was causing crash)
-        // file.secure_url does NOT exist
+        const result = await cloudinary.uploader.upload(file.path);
+        imageUrls.push(result.secure_url);
       }
 
-      // ✅ make sure array exists
+      // ✅ ensure array exists
+      if (!order.referenceImages) {
+        order.referenceImages = [];
+      }
+
+      order.referenceImages.push(...imageUrls);
+
+      await order.save();
+
+      res.status(200).json({
+        message: "Customer files uploaded",
+        files: imageUrls,
+      });
+
+    } catch (err) {
+      console.error("🔥 CUSTOMER UPLOAD ERROR:", err);
+      res.status(500).json({
+        message: "Upload failed",
+        error: err.message,
+      });
+    }
+  }
+);
+
+
+/* ================= CREATOR UPLOAD ================= */
+router.post(
+  "/upload/creator/:orderId",
+  protect,
+  upload.array("files"),
+  async (req, res) => {
+    try {
+      console.log("📂 Creator Files:", req.files);
+
+      const { orderId } = req.params;
+
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      const imageUrls = [];
+
+      // ✅ Upload to Cloudinary
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path);
+        imageUrls.push(result.secure_url);
+      }
+
+      // ✅ ensure array exists
       if (!order.customerFiles) {
         order.customerFiles = [];
       }
 
-      order.customerFiles.push(...filePaths);
+      order.customerFiles.push(...imageUrls);
 
       await order.save();
 
-      res.json({
-        message: "Files uploaded successfully",
-        files: filePaths,
+      res.status(200).json({
+        message: "Creator files uploaded",
+        files: imageUrls,
       });
 
     } catch (error) {
-      console.error("🔥 UPLOAD ERROR:", error);
+      console.error("🔥 CREATOR UPLOAD ERROR:", error);
       res.status(500).json({
         message: "Upload failed",
         error: error.message,

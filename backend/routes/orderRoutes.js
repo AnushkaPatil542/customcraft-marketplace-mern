@@ -391,9 +391,10 @@ router.post(
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // ✅ Cloudinary URLs already handled by multer-storage-cloudinary
+      // ✅ CloudinaryStorage already gives secure_url
       const imageUrls = req.files.map(file => file.path);
 
+      order.customerFiles = order.customerFiles || [];
       order.customerFiles.push(...imageUrls);
 
       await order.save();
@@ -405,7 +406,10 @@ router.post(
 
     } catch (err) {
       console.error("🔥 CUSTOMER UPLOAD ERROR:", err);
-      res.status(500).json({ message: err.message });
+      res.status(500).json({
+        message: "Upload failed",
+        error: err.message,
+      });
     }
   }
 );
@@ -430,6 +434,7 @@ router.post(
 
       const imageUrls = req.files.map(file => file.path);
 
+      order.creatorFiles = order.creatorFiles || [];
       order.creatorFiles.push(...imageUrls);
 
       await order.save();
@@ -442,7 +447,8 @@ router.post(
     } catch (error) {
       console.error("🔥 CREATOR UPLOAD ERROR:", error);
       res.status(500).json({
-        message: error.message,
+        message: "Upload failed",
+        error: error.message,
       });
     }
   }

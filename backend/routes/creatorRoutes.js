@@ -1,9 +1,14 @@
 const express = require("express");
-const { getCreatorEarnings } = require("../controllers/creatorController");
+const { getCreatorEarnings, uploadWork } = require("../controllers/creatorController");
 const { protect, creatorOnly } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
+// ✅ Earnings
 router.get("/earnings", protect, creatorOnly, getCreatorEarnings);
+
+// ✅ Upload work (IMPORTANT)
+router.post("/upload", protect, creatorOnly, upload.single("file"), uploadWork);
 
 module.exports = router;

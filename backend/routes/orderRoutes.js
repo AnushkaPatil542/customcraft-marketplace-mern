@@ -371,59 +371,63 @@ global.io.to(order.customer.toString()).emit("notification", notification);
   }
 });
 
-router.post(
-  "/upload/customer/:id",
+router.post("/upload/customer/:id",
   protect,
   upload.array("files"),
   async (req, res) => {
     try {
       const order = await Order.findById(req.params.id);
+
       if (!order) {
-  return res.status(404).json({ message: "Order not found" });
-}
+        return res.status(404).json({ message: "Order not found" });
+      }
 
-if (!req.files || req.files.length === 0) {
-  return res.status(400).json({ message: "No files uploaded" });
-}
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
 
-const filePaths = req.files.map(file => file.path || file.secure_url);
+      const filePaths = req.files.map(file => file.path || file.secure_url);
+
       order.customerFiles.push(...filePaths);
       await order.save();
 
       res.json({ message: "Files uploaded", files: filePaths });
+
     } catch (error) {
+      console.error("UPLOAD ERROR:", error);
       res.status(500).json({ message: error.message });
     }
   }
 );
 
-router.post(
-  "/upload/creator/:id",
+router.post("/upload/creator/:id",
   protect,
-  creatorOnly,
   upload.array("files"),
   async (req, res) => {
     try {
       const order = await Order.findById(req.params.id);
+
       if (!order) {
-  return res.status(404).json({ message: "Order not found" });
-}
+        return res.status(404).json({ message: "Order not found" });
+      }
 
-if (!req.files || req.files.length === 0) {
-  return res.status(400).json({ message: "No files uploaded" });
-}
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
 
-const filePaths = req.files.map(file => file.path || file.secure_url);
-      order.creatorFiles.push(...filePaths);
+      const filePaths = req.files.map(file => file.path || file.secure_url);
+
+      order.customerFiles.push(...filePaths);
       await order.save();
 
-      res.json({ message: "Work uploaded", files: filePaths });
+      res.json({ message: "Files uploaded", files: filePaths });
+
     } catch (error) {
+      console.error("UPLOAD ERROR:", error);
       res.status(500).json({ message: error.message });
     }
   }
 );
-
 
 
 module.exports = router;

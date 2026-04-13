@@ -432,11 +432,10 @@ router.post(
   upload.array("files"),
   async (req, res) => {
     try {
-      console.log("📂 Creator Files:", req.files);
+      console.log("FILES:", req.files);
 
-      const { orderId } = req.params;
+      const order = await Order.findById(req.params.orderId);
 
-      const order = await Order.findById(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
@@ -447,13 +446,31 @@ router.post(
 
       const imageUrls = [];
 
-      // ✅ Upload to Cloudinary
       for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path);
+        // 🔥 FIX: handle both cases
+        let result;
+
+        if (file.path) {
+          // disk storage
+          result = await cloudinary.uploader.upload(file.path);
+        } else if (file.buffer) {
+          // memory storage (Render case)
+          result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              { folder: "orders" },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(file.buffer);
+          });
+        } else {
+          throw new Error("File missing path & buffer");
+        }
+
         imageUrls.push(result.secure_url);
       }
 
-      // ✅ ensure array exists
       if (!order.customerFiles) {
         order.customerFiles = [];
       }
@@ -463,12 +480,12 @@ router.post(
       await order.save();
 
       res.status(200).json({
-        message: "Creator files uploaded",
+        message: "Upload success",
         files: imageUrls,
       });
 
     } catch (error) {
-      console.error("🔥 CREATOR UPLOAD ERROR:", error);
+      console.error("🔥 FULL ERROR:", error);
       res.status(500).json({
         message: "Upload failed",
         error: error.message,
@@ -476,5 +493,4 @@ router.post(
     }
   }
 );
-
 module.exports = router;

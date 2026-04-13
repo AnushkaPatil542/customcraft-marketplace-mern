@@ -30,28 +30,29 @@ function CreateOrder() {
         }
       );
 
-      const orderId = res.data._id; // ✅ get created order id
+      const _orderId = res.data._id; // ✅ get created order id
 
       // ✅ 2. Upload files (if any)
-      if (files.length > 0) {
-        const formData = new FormData();
+      // ✅ 2. Upload files (FIXED)
+if (files.length > 0) {
+  const formData = new FormData();
 
-        for (let i = 0; i < files.length; i++) {
-          formData.append("files", files[i]);
-        }
+  // 🔥 IMPORTANT: use "file" not "files"
+  for (let i = 0; i < files.length; i++) {
+    formData.append("file", files[i]);
+  }
 
-        await axios.post(
-          `${API}/api/orders/upload/customer/${orderId}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      }
-
+  await axios.post(
+    `${API}/api/creator/upload`,   // ✅ FIXED API
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+}
       setMessage("✅ Order + Files submitted successfully!");
 
       // reset form

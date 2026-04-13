@@ -400,11 +400,14 @@ router.post(
     }
   }
 );
-router.post("/upload/creator/:id",
+router.post(
+  "/upload/creator/:id",
   protect,
   upload.array("files"),
   async (req, res) => {
     try {
+      console.log("FILES RECEIVED:", req.files);
+
       const order = await Order.findById(req.params.id);
 
       if (!order) {
@@ -415,19 +418,40 @@ router.post("/upload/creator/:id",
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      const filePaths = req.files.map(file => file.path || file.secure_url);
+      const filePaths = [];
+
+      for (const file of req.files) {
+        // ✅ if using local storage
+        if (file.path) {
+          filePaths.push(file.path);
+        }
+
+        // ❌ remove this (was causing crash)
+        // file.secure_url does NOT exist
+      }
+
+      // ✅ make sure array exists
+      if (!order.customerFiles) {
+        order.customerFiles = [];
+      }
 
       order.customerFiles.push(...filePaths);
+
       await order.save();
 
-      res.json({ message: "Files uploaded", files: filePaths });
+      res.json({
+        message: "Files uploaded successfully",
+        files: filePaths,
+      });
 
     } catch (error) {
-      console.error("UPLOAD ERROR:", error);
-      res.status(500).json({ message: error.message });
+      console.error("🔥 UPLOAD ERROR:", error);
+      res.status(500).json({
+        message: "Upload failed",
+        error: error.message,
+      });
     }
   }
 );
-
 
 module.exports = router;

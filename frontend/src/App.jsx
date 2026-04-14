@@ -19,6 +19,7 @@ import CreatorReviews from "./pages/creator/CreatorReviews";
 import CreatorEarnings from "./pages/creator/CreatorEarnings";
 import CreatorPortfolio from "./pages/creator/CreatorPortfolio";
 import Chat from "./pages/common/Chat";
+import OrderDetails from "./pages/common/OrderDetails";
 import AdminEarnings from "./pages/admin/AdminEarnings";
 
 
@@ -190,6 +191,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/order/:id" element={<OrderDetails />} />
 
       {/* 💬 Chat */}
       <Route

@@ -16,7 +16,6 @@ const creatorRoutes = require("./routes/creatorRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 
-
 dotenv.config();
 connectDB();
 
@@ -24,48 +23,16 @@ const app = express();
 
 /* ================= MIDDLEWARE ================= */
 
-// ✅ SIMPLE & FINAL CORS FIX
 app.use(cors({
-  origin: "*",   // allow all origins (fixes all CORS issues)
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔥 Create HTTP server
-const server = http.createServer(app);
-
-// 🔥 Setup Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-
-// 🔥 Make io global
-global.io = io;
-
-/* ================= SOCKET.IO ================= */
-io.on("connection", (socket) => {
-  console.log("🔥 User connected:", socket.id);
-
-  socket.on("joinRoom", (orderId) => {
-    socket.join(orderId);
-    console.log("📦 Joined room:", orderId);
-  });
-
-  socket.on("sendMessage", ({ orderId, message }) => {
-    socket.to(orderId).emit("receiveMessage", message);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
-  });
-});
-
 /* ================= ROUTES ================= */
+
 app.use("/api/test", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
@@ -75,15 +42,63 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/creator", creatorRoutes);
 app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/messages", messageRoutes);
+
 app.use("/uploads", express.static("uploads"));
+
+/* ================= ERROR HANDLER ================= */
 app.use((err, req, res, next) => {
-  console.error("🔥 SERVER ERROR:", err.stack);
+  console.error("🔥 SERVER ERROR:", err);
   res.status(500).json({
     message: err.message || "Internal Server Error",
   });
 });
 
+/* ================= HTTP + SOCKET ================= */
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+global.io = io;
+
+/* ================= SOCKET FIX ================= */
+
+io.on("connection", (socket) => {
+  console.log("🔥 Connected:", socket.id);
+
+  socket.on("joinRoom", (orderId) => {
+    if (!orderId) return;
+    socket.join(orderId);
+    console.log("📦 Joined room:", orderId);
+  });
+
+  socket.on("sendMessage", ({ orderId, message }) => {
+    if (!orderId || !message) return;
+
+    socket.to(orderId).emit("receiveMessage", message);
+  });
+
+  socket.on("typing", ({ orderId, userId, isTyping }) => {
+    if (!orderId) return;
+
+    socket.to(orderId).emit("userTyping", {
+      userId,
+      isTyping,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Disconnected:", socket.id);
+  });
+});
+
 /* ================= START SERVER ================= */
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, "0.0.0.0", () => {

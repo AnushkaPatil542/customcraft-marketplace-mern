@@ -455,17 +455,25 @@ router.post(
 );
 router.get("/public/:id", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id)
-      .populate("customer", "name email")
-      .populate("assignedCreator", "name email");
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.json(order);
+    // ✅ combine all images properly
+    const images = [
+      ...(order.customerFiles || []),
+      ...(order.creatorFiles || []),
+    ];
+
+    res.json({
+      _id: order._id,
+      title: order.title,
+      images,   // ✅ IMPORTANT
+    });
+
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });

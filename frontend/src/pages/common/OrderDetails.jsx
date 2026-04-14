@@ -192,7 +192,7 @@ const OrderDetails = () => {
           </div>
           <div className="order-body">
             <div className="grid">
-              {order.files?.map((file, i) => (
+              {order.images?.map((file, i) => (
                 <div key={i} className="image-wrapper">
                   <img
                     src={file}

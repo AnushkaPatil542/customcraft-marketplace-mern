@@ -114,7 +114,7 @@ const Chat = () => {
       const res = await axios.post(`${API}/api/messages`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+          
         },
       });
 

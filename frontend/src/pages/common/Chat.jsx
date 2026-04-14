@@ -32,7 +32,9 @@ const Chat = () => {
     });
 
     socket.current.on("userTyping", ({ userId, isTyping }) => {
-      if (userId !== currentUserId) setOtherUserTyping(isTyping);
+      if (userId !== currentUserId) {
+        setOtherUserTyping(isTyping);
+      }
     });
 
     return () => socket.current.disconnect();
@@ -93,7 +95,7 @@ const Chat = () => {
     }, 1000);
   };
 
-  /* ================= SEND ================= */
+  /* ================= SEND MESSAGE ================= */
   const sendMessage = async () => {
     if (!text.trim() && !image) return;
 
@@ -109,7 +111,7 @@ const Chat = () => {
 
       const newMessage = res.data;
 
-      // ✅ instant UI update
+      // instant UI update (IMPORTANT FIX)
       setMessages((prev) => [...prev, newMessage]);
 
       socket.current.emit("sendMessage", {
@@ -147,96 +149,7 @@ const Chat = () => {
 
   /* ================= UI ================= */
   return (
-    <div className="chat-page">
-      <div className="chat-container">
-
-        {/* HEADER */}
-        <div className="chat-header">
-          <h2>💬 Chat Discussion</h2>
-          <p>Order ID: {orderId}</p>
-          <div className="online-status">
-            <div className="status-dot"></div>
-            <span>Live • Real-time</span>
-          </div>
-        </div>
-
-        {/* MESSAGES */}
-        <div className="messages">
-          {messages.length === 0 ? (
-            <div className="no-messages">
-              <span>💬</span>
-              <p>No messages yet</p>
-              <p>Start the conversation!</p>
-            </div>
-          ) : (
-            messages.map((msg) => {
-              const isOwn = msg.sender?.name === currentUserName;
-
-              return (
-                <div
-                  key={msg._id}
-                  className={`msg-row ${isOwn ? "right" : "left"}`}
-                >
-                  <div className={`bubble ${isOwn ? "own" : "other"}`}>
-                    {msg.text && <div className="msg-text">{msg.text}</div>}
-
-                    {msg.image?.url && (
-                      <img 
-                        src={msg.image.url} 
-                        className="msg-img" 
-                        alt="chat"
-                        onClick={() => window.open(msg.image.url, "_blank")}
-                      />
-                    )}
-
-                    <div className="msg-time">{formatTime(msg.createdAt)}</div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-
-          {otherUserTyping && (
-            <div className="typing-indicator">
-              <span>Someone is typing</span>
-              <div className="typing-dots">
-                <span></span><span></span><span></span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* PREVIEW */}
-        {preview && (
-          <div className="preview">
-            <img src={preview} alt="preview" />
-            <button onClick={clearMedia}>×</button>
-          </div>
-        )}
-
-        {/* INPUT */}
-        <div className="input-area">
-          <label className="file-label" title="Attach image">
-            📎
-            <input type="file" hidden onChange={handleImageChange} accept="image/*" />
-          </label>
-
-          <textarea
-            className="message-input"
-            value={text}
-            onChange={handleTyping}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            rows={1}
-          />
-
-          <button className="send-btn" onClick={sendMessage}>
-            Send →
-          </button>
-        </div>
-      </div>
-
+    <>
       <style>{`
         * {
           margin: 0;
@@ -246,28 +159,29 @@ const Chat = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
         }
 
-        .chat-page {
+        /* CENTER FIX - FULL SCREEN CENTERING */
+        .chat-wrapper {
           width: 100vw;
           min-height: 100vh;
           display: flex;
           justify-content: center;
           align-items: center;
-          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
-          padding: 1rem;
+          padding: 20px;
         }
 
         .chat-container {
           width: 100%;
-          max-width: 1000px;
+          max-width: 900px;
           height: 85vh;
           background: white;
-          border-radius: 1.5rem;
+          border-radius: 24px;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
           border: 1px solid rgba(34, 197, 94, 0.1);
           animation: fadeInUp 0.4s ease;
         }
@@ -289,13 +203,13 @@ const Chat = () => {
           color: white;
         }
 
-        .chat-header h2 {
+        .chat-header h3 {
           font-size: 1.3rem;
           font-weight: 600;
           margin-bottom: 0.25rem;
         }
 
-        .chat-header p {
+        .chat-header small {
           font-size: 0.8rem;
           opacity: 0.9;
         }
@@ -306,6 +220,9 @@ const Chat = () => {
           gap: 0.5rem;
           font-size: 0.7rem;
           margin-top: 0.5rem;
+          background: rgba(255,255,255,0.2);
+          padding: 0.25rem 0.75rem;
+          border-radius: 2rem;
         }
 
         .status-dot {
@@ -321,41 +238,41 @@ const Chat = () => {
           50% { opacity: 0.5; transform: scale(0.8); }
         }
 
-        .messages {
+        .messages-area {
           flex: 1;
-          overflow-y: auto;
           padding: 1.5rem;
+          overflow-y: auto;
           background: #f9fafb;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.75rem;
         }
 
-        .messages::-webkit-scrollbar {
+        .messages-area::-webkit-scrollbar {
           width: 6px;
         }
 
-        .messages::-webkit-scrollbar-track {
+        .messages-area::-webkit-scrollbar-track {
           background: #e5e7eb;
           border-radius: 3px;
         }
 
-        .messages::-webkit-scrollbar-thumb {
+        .messages-area::-webkit-scrollbar-thumb {
           background: #22c55e;
           border-radius: 3px;
         }
 
-        .msg-row {
+        .message-row {
           display: flex;
           width: 100%;
           animation: fadeIn 0.3s ease;
         }
 
-        .msg-row.right {
+        .message-own {
           justify-content: flex-end;
         }
 
-        .msg-row.left {
+        .message-other {
           justify-content: flex-start;
         }
 
@@ -366,13 +283,13 @@ const Chat = () => {
           position: relative;
         }
 
-        .bubble.own {
+        .message-own .bubble {
           background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border-bottom-right-radius: 0.25rem;
         }
 
-        .bubble.other {
+        .message-other .bubble {
           background: white;
           color: #1f2937;
           border: 1px solid #e5e7eb;
@@ -380,13 +297,13 @@ const Chat = () => {
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
-        .msg-text {
+        .message-text {
           font-size: 0.95rem;
           line-height: 1.4;
           word-wrap: break-word;
         }
 
-        .msg-img {
+        .chat-image {
           max-width: 200px;
           margin-top: 0.5rem;
           border-radius: 0.5rem;
@@ -394,17 +311,17 @@ const Chat = () => {
           transition: transform 0.2s ease;
         }
 
-        .msg-img:hover {
+        .chat-image:hover {
           transform: scale(1.02);
         }
 
-        .msg-time {
+        .message-time {
           font-size: 0.65rem;
           margin-top: 0.25rem;
           opacity: 0.7;
         }
 
-        .bubble.own .msg-time {
+        .message-own .message-time {
           text-align: right;
         }
 
@@ -441,23 +358,7 @@ const Chat = () => {
           30% { transform: translateY(-6px); }
         }
 
-        .no-messages {
-          text-align: center;
-          padding: 3rem;
-          color: #94a3b8;
-        }
-
-        .no-messages span {
-          font-size: 3rem;
-          display: block;
-          margin-bottom: 0.5rem;
-        }
-
-        .no-messages p {
-          margin: 0.25rem 0;
-        }
-
-        .preview {
+        .preview-container {
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -466,7 +367,7 @@ const Chat = () => {
           border-top: 1px solid #e5e7eb;
         }
 
-        .preview img {
+        .preview-image {
           width: 60px;
           height: 60px;
           object-fit: cover;
@@ -474,7 +375,7 @@ const Chat = () => {
           border: 2px solid #22c55e;
         }
 
-        .preview button {
+        .clear-preview {
           background: #ef4444;
           color: white;
           border: none;
@@ -489,16 +390,16 @@ const Chat = () => {
           transition: all 0.2s;
         }
 
-        .preview button:hover {
+        .clear-preview:hover {
           transform: scale(1.1);
         }
 
         .input-area {
-          padding: 1rem 1.5rem;
-          background: white;
-          border-top: 1px solid #e5e7eb;
           display: flex;
+          padding: 1rem 1.5rem;
           gap: 0.75rem;
+          border-top: 1px solid #e5e7eb;
+          background: white;
           align-items: flex-end;
         }
 
@@ -521,7 +422,7 @@ const Chat = () => {
           transform: scale(1.05);
         }
 
-        .message-input {
+        textarea {
           flex: 1;
           padding: 0.85rem 1rem;
           border: 2px solid #e5e7eb;
@@ -534,18 +435,17 @@ const Chat = () => {
           color: #1f2937;
         }
 
-        .message-input:focus {
+        textarea:focus {
           outline: none;
           border-color: #22c55e;
-          background: white;
           box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
         }
 
-        .message-input::placeholder {
+        textarea::placeholder {
           color: #9ca3af;
         }
 
-        .send-btn {
+        button {
           background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border: none;
@@ -556,9 +456,15 @@ const Chat = () => {
           transition: all 0.2s ease;
         }
 
-        .send-btn:hover {
+        button:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .no-messages {
+          text-align: center;
+          padding: 3rem;
+          color: #94a3b8;
         }
 
         @keyframes fadeIn {
@@ -567,17 +473,98 @@ const Chat = () => {
         }
 
         @media (max-width: 768px) {
-          .chat-page { padding: 0.5rem; }
-          .chat-container { height: 95vh; border-radius: 1rem; }
+          .chat-wrapper { padding: 10px; }
+          .chat-container { height: 95vh; border-radius: 16px; }
           .bubble { max-width: 85%; }
           .chat-header { padding: 1rem; }
-          .messages { padding: 1rem; }
+          .messages-area { padding: 1rem; }
           .input-area { padding: 0.75rem 1rem; gap: 0.5rem; }
-          .send-btn { padding: 0.75rem 1rem; }
+          button { padding: 0.75rem 1rem; }
           .file-label { width: 36px; height: 36px; font-size: 1.2rem; }
         }
       `}</style>
-    </div>
+
+      <div className="chat-wrapper">
+        <div className="chat-container">
+          <div className="chat-header">
+            <h3>💬 Chat Discussion</h3>
+            <small>Order ID: {orderId}</small>
+            <div className="online-status">
+              <div className="status-dot"></div>
+              <span>Connected • Real-time</span>
+            </div>
+          </div>
+
+          <div className="messages-area">
+            {messages.length === 0 ? (
+              <div className="no-messages">
+                <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>💬</span>
+                <p>No messages yet</p>
+                <p style={{ fontSize: "0.8rem" }}>Start the conversation!</p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isOwn = msg.sender?.name === currentUserName;
+
+                return (
+                  <div
+                    key={msg._id}
+                    className={`message-row ${isOwn ? "message-own" : "message-other"}`}
+                  >
+                    <div className="bubble">
+                      {msg.text && <div className="message-text">{msg.text}</div>}
+
+                      {msg.image?.url && (
+                        <img
+                          src={msg.image.url}
+                          className="chat-image"
+                          alt="chat"
+                          onClick={() => window.open(msg.image.url, "_blank")}
+                        />
+                      )}
+
+                      <div className="message-time">{formatTime(msg.createdAt)}</div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {otherUserTyping && (
+              <div className="typing-indicator">
+                <span>Someone is typing</span>
+                <div className="typing-dots">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {preview && (
+            <div className="preview-container">
+              <img src={preview} alt="preview" className="preview-image" />
+              <button className="clear-preview" onClick={clearMedia}>×</button>
+            </div>
+          )}
+
+          <div className="input-area">
+            <label className="file-label" title="Attach image">
+              📎
+              <input type="file" hidden onChange={handleImageChange} accept="image/*" />
+            </label>
+            <textarea
+              value={text}
+              onChange={handleTyping}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message..."
+              rows={1}
+            />
+            <button onClick={sendMessage}>Send →</button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

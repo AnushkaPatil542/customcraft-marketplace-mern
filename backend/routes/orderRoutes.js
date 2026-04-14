@@ -420,36 +420,35 @@ router.post(
   upload.array("files"),
   async (req, res) => {
     try {
-      console.log("FILES:", req.files);
-
       const order = await Order.findById(req.params.orderId);
 
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
 
+      console.log("FILES:", req.files); // DEBUG
+
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      const imageUrls = req.files.map(file => file.path);
+      const imageUrls = req.files.map((file) => file.path);
+
+      console.log("CLOUDINARY URLS:", imageUrls);
 
       order.creatorFiles = order.creatorFiles || [];
       order.creatorFiles.push(...imageUrls);
 
-      await order.save();
+      await order.save(); // 🔥 MUST SAVE
 
       res.json({
-        message: "Creator upload success",
+        message: "Upload success",
         files: imageUrls,
       });
 
     } catch (error) {
-      console.error("🔥 CREATOR UPLOAD ERROR:", error);
-      res.status(500).json({
-        message: "Upload failed",
-        error: error.message,
-      });
+      console.error("UPLOAD ERROR:", error);
+      res.status(500).json({ message: error.message });
     }
   }
 );
@@ -461,19 +460,22 @@ router.get("/public/:id", async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // ✅ combine all images properly
-    const images = [
-      ...(order.customerFiles || []),
-      ...(order.creatorFiles || []),
-    ];
+    // 🔥 UNIVERSAL IMAGE FIX (covers all possibilities)
+    const images =
+      order.images ||
+      order.files ||
+      order.customerFiles ||
+      order.creatorFiles ||
+      [];
 
     res.json({
       _id: order._id,
       title: order.title,
-      images,   // ✅ IMPORTANT
+      images,
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });

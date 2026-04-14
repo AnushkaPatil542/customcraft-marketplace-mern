@@ -21,14 +21,14 @@ const Chat = () => {
   const socket = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  /* ================= SOCKET CONNECTION ================= */
+  /* ================= SOCKET ================= */
   useEffect(() => {
     socket.current = io(`${API}`);
 
     socket.current.emit("joinRoom", orderId);
 
-    socket.current.on("receiveMessage", (newMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
+    socket.current.on("receiveMessage", (msg) => {
+      setMessages((prev) => [...prev, msg]);
     });
 
     socket.current.on("userTyping", ({ userId, isTyping }) => {
@@ -114,18 +114,18 @@ const Chat = () => {
       const res = await axios.post(`${API}/api/messages`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          
         },
       });
 
       const newMessage = res.data;
 
+      // socket emit
       socket.current.emit("sendMessage", {
         orderId,
         message: newMessage,
       });
 
-      setMessages((prev) => [...prev, newMessage]);
+      // ❌ removed duplicate setMessages (socket handles it)
       setText("");
       clearMedia();
 
@@ -190,9 +190,11 @@ const Chat = () => {
                   maxWidth: "70%",
                 }}
               >
-                <div>{msg.text}</div>
+                {/* TEXT */}
+                {msg.text && <div>{msg.text}</div>}
 
-                {msg.image?.url && (
+                {/* IMAGE */}
+                {msg.image && msg.image.url && (
                   <img
                     src={msg.image.url}
                     alt="chat"
@@ -200,10 +202,13 @@ const Chat = () => {
                       width: "200px",
                       marginTop: "5px",
                       borderRadius: "8px",
+                      cursor: "pointer",
                     }}
+                    onClick={() => window.open(msg.image.url, "_blank")}
                   />
                 )}
 
+                {/* TIME */}
                 <div style={{ fontSize: "10px", marginTop: "5px" }}>
                   {formatTime(msg.createdAt)}
                 </div>

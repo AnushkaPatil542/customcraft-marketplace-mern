@@ -121,5 +121,75 @@ router.get("/:orderId", protect, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+router.delete("/:messageId", protect, async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.messageId);
+
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // only sender can delete
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    await message.deleteOne();
+
+    global.io.to(message.order.toString()).emit("messageDeleted", message._id);
+
+    res.json({ message: "Deleted successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+router.put("/:messageId", protect, async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    const message = await Message.findById(req.params.messageId);
+
+    if (!message) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    message.text = text;
+    await message.save();
+
+    global.io.to(message.order.toString()).emit("messageUpdated", message);
+
+    res.json(message);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+router.put("/seen/:orderId", protect, async (req, res) => {
+  try {
+    await Message.updateMany(
+      {
+        order: req.params.orderId,
+        sender: { $ne: req.user._id },
+      },
+      {
+        $addToSet: { seenBy: req.user._id },
+      }
+    );
+
+    global.io.to(req.params.orderId).emit("messagesSeen", {
+      userId: req.user._id,
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;

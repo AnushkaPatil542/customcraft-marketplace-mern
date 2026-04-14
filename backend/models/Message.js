@@ -18,6 +18,12 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",   // changed from required → optional (important for images only messages)
     },
+    seenBy: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+],
 
     image: {
       url: {

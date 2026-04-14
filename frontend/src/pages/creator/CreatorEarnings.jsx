@@ -23,14 +23,20 @@ const CreatorEarnings = () => {
 
   const token = localStorage.getItem("token");
 
-  // ✅ SOCIAL SHARE LOGIC - Enhanced with multiple platforms
-  const shareWork = (order, platform) => {
-    const text = `✨ Check out my custom design: ${order.title} 🚀 I completed this project on CustomCraft!`;
-    const url = `https://customcraft-marketplace-mern.vercel.app/order/${order._Id}`;
+    const shareWork = (order, platform) => {
+    const orderId = order?._id;
 
+    if (!orderId) {
+      console.error("Order ID missing:", order);
+      return;
+    }
+
+    const text = `✨ Check out my custom design: ${order.title} 🚀 I completed this project on CustomCraft!`;
+    const url = `https://customcraft-marketplace-mern.vercel.app/order/${orderId}`;
+
+    let shareUrl = "";
 
     
-    let shareUrl = "";
     
     switch(platform) {
       case "whatsapp":
@@ -38,9 +44,6 @@ const CreatorEarnings = () => {
         break;
       case "twitter":
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-        break;
-      case "linkedin":
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
         break;
       case "facebook":
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;

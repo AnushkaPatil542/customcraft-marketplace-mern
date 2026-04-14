@@ -189,34 +189,62 @@ const Chat = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+        /* Main Wrapper - Centered */
+        .chat-wrapper {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1.5rem;
+        }
+
+        /* Chat Container - Centered */
         .chat-container {
-          max-width: 1000px;
-          margin: 2rem auto;
+          width: 100%;
+          max-width: 1100px;
+          height: 85vh;
           background: white;
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          border-radius: 2rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          display: flex;
+          flex-direction: column;
           overflow: hidden;
-          border: 1px solid rgba(34, 197, 94, 0.1);
+          animation: slideUp 0.4s ease;
         }
 
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Header */
         .chat-header {
-          background: linear-gradient(125deg, #22c55e, #16a34a);
-          padding: 1.25rem 1.5rem;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 1.25rem 2rem;
           color: white;
         }
 
         .chat-header h2 {
-          font-size: 1.3rem;
+          font-size: 1.4rem;
           font-weight: 600;
-          margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .chat-header p {
           font-size: 0.8rem;
-          opacity: 0.9;
+          opacity: 0.85;
+          margin-top: 0.25rem;
         }
 
         .online-status {
@@ -225,12 +253,15 @@ const Chat = () => {
           gap: 0.5rem;
           font-size: 0.7rem;
           margin-top: 0.5rem;
+          background: rgba(255,255,255,0.2);
+          padding: 0.25rem 0.75rem;
+          border-radius: 2rem;
         }
 
         .status-dot {
           width: 8px;
           height: 8px;
-          background: #22c55e;
+          background: #4ade80;
           border-radius: 50%;
           animation: pulse 1.5s infinite;
         }
@@ -240,85 +271,104 @@ const Chat = () => {
           50% { opacity: 0.5; transform: scale(0.8); }
         }
 
+        /* Messages Area */
         .messages-area {
-          height: 60vh;
+          flex: 1;
           overflow-y: auto;
-          padding: 1.5rem;
-          background: #f9fafb;
+          padding: 1.5rem 2rem;
+          background: #f8fafc;
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
 
+        /* Custom Scrollbar */
         .messages-area::-webkit-scrollbar {
           width: 6px;
         }
 
         .messages-area::-webkit-scrollbar-track {
-          background: #e5e7eb;
+          background: #e2e8f0;
           border-radius: 3px;
         }
 
         .messages-area::-webkit-scrollbar-thumb {
-          background: #22c55e;
+          background: #a78bfa;
           border-radius: 3px;
         }
 
-        .message {
+        /* Message Row */
+        .message-row {
           display: flex;
-          flex-direction: column;
-          max-width: 70%;
+          width: 100%;
           animation: fadeIn 0.3s ease;
         }
 
-        .message-own {
-          align-self: flex-end;
+        .message-row-own {
+          justify-content: flex-end;
         }
 
-        .message-other {
-          align-self: flex-start;
+        .message-row-other {
+          justify-content: flex-start;
         }
 
+        /* Message Bubble */
         .message-bubble {
+          max-width: 65%;
           padding: 0.75rem 1rem;
           border-radius: 1.25rem;
-          word-wrap: break-word;
+          position: relative;
         }
 
         .message-own .message-bubble {
-          background: linear-gradient(125deg, #22c55e, #16a34a);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           border-bottom-right-radius: 0.25rem;
         }
 
         .message-other .message-bubble {
           background: white;
-          color: #1f2937;
-          border: 1px solid #e5e7eb;
+          color: #1e293b;
+          border: 1px solid #e2e8f0;
           border-bottom-left-radius: 0.25rem;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        /* Sender Name */
+        .message-sender {
+          font-size: 0.7rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+          opacity: 0.8;
+        }
+
+        .message-own .message-sender {
+          text-align: right;
+        }
+
+        /* Message Text */
         .message-text {
           font-size: 0.95rem;
           line-height: 1.4;
+          word-wrap: break-word;
         }
 
+        /* Message Time */
         .message-time {
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           margin-top: 0.25rem;
-          margin-left: 0.25rem;
-          color: #9ca3af;
+          opacity: 0.7;
         }
 
         .message-own .message-time {
           text-align: right;
         }
 
+        /* Chat Image */
         .chat-image {
           max-width: 200px;
           margin-top: 0.5rem;
-          border-radius: 0.5rem;
+          border-radius: 0.75rem;
           cursor: pointer;
           transition: transform 0.2s ease;
         }
@@ -327,13 +377,15 @@ const Chat = () => {
           transform: scale(1.02);
         }
 
+        /* Edit Button */
         .edit-btn {
           background: none;
           border: none;
           cursor: pointer;
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           margin-top: 0.5rem;
-          opacity: 0.7;
+          opacity: 0.6;
+          transition: opacity 0.2s;
           color: inherit;
         }
 
@@ -341,13 +393,15 @@ const Chat = () => {
           opacity: 1;
         }
 
+        /* Edit Mode */
         .edit-textarea {
           width: 100%;
           padding: 0.5rem;
           border-radius: 0.5rem;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #e2e8f0;
           font-family: inherit;
           margin-bottom: 0.5rem;
+          resize: vertical;
         }
 
         .save-btn {
@@ -357,18 +411,20 @@ const Chat = () => {
           border: none;
           border-radius: 0.5rem;
           cursor: pointer;
+          font-size: 0.75rem;
         }
 
+        /* Typing Indicator */
         .typing-indicator {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
           background: white;
-          border-radius: 1rem;
+          border-radius: 1.5rem;
           width: fit-content;
-          border: 1px solid #e5e7eb;
-          animation: fadeIn 0.3s ease;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .typing-dots {
@@ -379,7 +435,7 @@ const Chat = () => {
         .typing-dots span {
           width: 6px;
           height: 6px;
-          background: #22c55e;
+          background: #a78bfa;
           border-radius: 50%;
           animation: typingBounce 1.4s infinite;
         }
@@ -392,40 +448,48 @@ const Chat = () => {
           30% { transform: translateY(-6px); }
         }
 
+        /* Preview Container */
         .preview-container {
-          position: relative;
-          display: inline-block;
-          margin: 0.5rem 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1.5rem;
+          background: #f1f5f9;
+          border-top: 1px solid #e2e8f0;
         }
 
         .preview-image {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           object-fit: cover;
           border-radius: 0.5rem;
+          border: 2px solid #a78bfa;
         }
 
         .clear-preview {
-          position: absolute;
-          top: -8px;
-          right: -8px;
           background: #ef4444;
           color: white;
           border: none;
           border-radius: 50%;
-          width: 20px;
-          height: 20px;
+          width: 24px;
+          height: 24px;
           cursor: pointer;
-          font-size: 12px;
+          font-size: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all 0.2s;
         }
 
+        .clear-preview:hover {
+          transform: scale(1.1);
+        }
+
+        /* Input Area */
         .input-area {
           padding: 1rem 1.5rem;
           background: white;
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid #e2e8f0;
           display: flex;
           gap: 0.75rem;
           align-items: flex-end;
@@ -435,38 +499,47 @@ const Chat = () => {
           cursor: pointer;
           font-size: 1.5rem;
           padding: 0.5rem;
-          transition: transform 0.2s ease;
+          transition: all 0.2s;
+          background: #f1f5f9;
+          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .file-label:hover {
-          transform: scale(1.1);
+          background: #e2e8f0;
+          transform: scale(1.05);
         }
 
         .message-input {
           flex: 1;
-          padding: 0.75rem 1rem;
-          border: 2px solid #e5e7eb;
-          border-radius: 1rem;
+          padding: 0.85rem 1rem;
+          border: 2px solid #e2e8f0;
+          border-radius: 1.5rem;
           font-size: 0.95rem;
           font-family: inherit;
           resize: none;
           transition: all 0.2s ease;
-          background: #ffffff;
-          color: #1f2937;
+          background: #f8fafc;
+          color: #1e293b;
         }
 
         .message-input:focus {
           outline: none;
-          border-color: #22c55e;
-          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+          border-color: #a78bfa;
+          background: white;
+          box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
         }
 
         .send-btn {
-          background: linear-gradient(125deg, #22c55e, #16a34a);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
           border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 1rem;
+          padding: 0.85rem 1.5rem;
+          border-radius: 1.5rem;
           cursor: pointer;
           font-weight: 600;
           transition: all 0.2s ease;
@@ -474,7 +547,14 @@ const Chat = () => {
 
         .send-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* No Messages */
+        .no-messages {
+          text-align: center;
+          padding: 3rem;
+          color: #94a3b8;
         }
 
         @keyframes fadeIn {
@@ -482,101 +562,124 @@ const Chat = () => {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-          .chat-container { margin: 1rem; }
-          .message { max-width: 85%; }
-          .input-area { padding: 0.75rem 1rem; }
+          .chat-wrapper { padding: 0.5rem; }
+          .chat-container { height: 95vh; border-radius: 1rem; }
+          .message-bubble { max-width: 85%; }
+          .chat-header { padding: 1rem; }
+          .messages-area { padding: 1rem; }
+          .input-area { padding: 0.75rem 1rem; gap: 0.5rem; }
           .send-btn { padding: 0.75rem 1rem; }
+          .file-label { width: 36px; height: 36px; font-size: 1.2rem; }
         }
       `}</style>
 
-      <div className="chat-container">
-        <div className="chat-header">
-          <h2>💬 Chat Discussion</h2>
-          <p>Order ID: {orderId}</p>
-          <div className="online-status">
-            <div className="status-dot"></div>
-            <span>Connected • Real-time</span>
+      <div className="chat-wrapper">
+        <div className="chat-container">
+          <div className="chat-header">
+            <h2>💬 Real-time Chat</h2>
+            <p>Order #{orderId?.slice(-8)}</p>
+            <div className="online-status">
+              <div className="status-dot"></div>
+              <span>Live • Real-time messaging</span>
+            </div>
           </div>
-        </div>
 
-        <div className="messages-area">
-          {messages.map((msg) => {
-            const isOwn = msg.sender?.name === currentUserName;
+          <div className="messages-area">
+            {messages.length === 0 ? (
+              <div className="no-messages">
+                <span style={{ fontSize: "3rem" }}>💬</span>
+                <p>No messages yet</p>
+                <p style={{ fontSize: "0.8rem" }}>Start the conversation!</p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isOwn = msg.sender?.name === currentUserName;
 
-            return (
-              <div
-                key={msg._id}
-                className={`message ${isOwn ? "message-own" : "message-other"}`}
-              >
-                <div className="message-bubble">
-                  {editingId === msg._id ? (
-                    <>
-                      <textarea
-                        className="edit-textarea"
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                      />
-                      <button className="save-btn" onClick={() => saveEdit(msg._id)}>
-                        Save
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {msg.text && <div className="message-text">{msg.text}</div>}
-                      {msg.image?.url && (
-                        <img
-                          src={msg.image.url}
-                          alt="chat"
-                          className="chat-image"
-                          onClick={() => window.open(msg.image.url, "_blank")}
-                        />
+                return (
+                  <div
+                    key={msg._id}
+                    className={`message-row ${isOwn ? "message-row-own" : "message-row-other"}`}
+                  >
+                    <div className={`message-bubble ${isOwn ? "message-own" : "message-other"}`}>
+                      <div className="message-sender">
+                        {msg.sender?.name || "User"} {isOwn && "(You)"}
+                      </div>
+
+                      {editingId === msg._id ? (
+                        <>
+                          <textarea
+                            className="edit-textarea"
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            rows={2}
+                          />
+                          <button className="save-btn" onClick={() => saveEdit(msg._id)}>
+                            ✓ Save
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {msg.text && <div className="message-text">{msg.text}</div>}
+                          {msg.image?.url && (
+                            <img
+                              src={msg.image.url}
+                              alt="chat attachment"
+                              className="chat-image"
+                              onClick={() => window.open(msg.image.url, "_blank")}
+                            />
+                          )}
+                          {isOwn && (
+                            <button className="edit-btn" onClick={() => startEdit(msg)}>
+                              ✏️ Edit
+                            </button>
+                          )}
+                        </>
                       )}
-                      {isOwn && (
-                        <button className="edit-btn" onClick={() => startEdit(msg)}>
-                          ✏️ Edit
-                        </button>
-                      )}
-                    </>
-                  )}
+
+                      <div className="message-time">{formatTime(msg.createdAt)}</div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {otherUserTyping && (
+              <div className="typing-indicator">
+                <span>Someone is typing</span>
+                <div className="typing-dots">
+                  <span></span><span></span><span></span>
                 </div>
-                <div className="message-time">{formatTime(msg.createdAt)}</div>
               </div>
-            );
-          })}
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-          {otherUserTyping && (
-            <div className="typing-indicator">
-              <span>Someone is typing</span>
-              <div className="typing-dots">
-                <span></span><span></span><span></span>
-              </div>
+          {preview && (
+            <div className="preview-container">
+              <img src={preview} alt="preview" className="preview-image" />
+              <button className="clear-preview" onClick={clearMedia}>×</button>
             </div>
           )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        {preview && (
-          <div className="preview-container">
-            <img src={preview} alt="preview" className="preview-image" />
-            <button className="clear-preview" onClick={clearMedia}>×</button>
+          <div className="input-area">
+            <label className="file-label" title="Attach image">
+              📎
+              <input type="file" onChange={handleImageChange} style={{ display: "none" }} accept="image/*" />
+            </label>
+            <textarea
+              className="message-input"
+              value={text}
+              onChange={handleTyping}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message..."
+              rows={1}
+            />
+            <button className="send-btn" onClick={sendMessage}>
+              Send →
+            </button>
           </div>
-        )}
-
-        <div className="input-area">
-          <label className="file-label" title="Attach image">
-            📎
-            <input type="file" onChange={handleImageChange} style={{ display: "none" }} />
-          </label>
-          <textarea
-            className="message-input"
-            value={text}
-            onChange={handleTyping}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            rows={1}
-          />
-          <button className="send-btn" onClick={sendMessage}>Send →</button>
         </div>
       </div>
     </>

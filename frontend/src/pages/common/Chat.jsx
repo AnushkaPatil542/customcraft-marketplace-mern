@@ -13,10 +13,6 @@ const Chat = () => {
   const [preview, setPreview] = useState(null);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
 
-  // EDIT
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState("");
-
   const token = localStorage.getItem("token");
   const currentUserName = localStorage.getItem("name");
   const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -31,14 +27,9 @@ const Chat = () => {
 
     socket.current.emit("joinRoom", orderId);
 
+    // receive message from others
     socket.current.on("receiveMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
-    });
-
-    socket.current.on("messageUpdated", (updatedMsg) => {
-      setMessages((prev) =>
-        prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
-      );
     });
 
     socket.current.on("userTyping", ({ userId, isTyping }) => {
@@ -76,7 +67,10 @@ const Chat = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    if (file) setPreview(URL.createObjectURL(file));
+
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const clearMedia = () => {
@@ -113,7 +107,10 @@ const Chat = () => {
       const formData = new FormData();
       formData.append("orderId", orderId);
       formData.append("text", text);
-      if (image) formData.append("image", image);
+
+      if (image) {
+        formData.append("image", image);
+      }
 
       const res = await axios.post(`${API}/api/messages`, formData, {
         headers: {
@@ -121,9 +118,16 @@ const Chat = () => {
         },
       });
 
+      const newMessage = res.data;
+
+      /* ✅ IMPORTANT FIX:
+         instantly update UI (no refresh needed) */
+      setMessages((prev) => [...prev, newMessage]);
+
+      /* also notify others via socket */
       socket.current.emit("sendMessage", {
         orderId,
-        message: res.data,
+        message: newMessage,
       });
 
       setText("");
@@ -139,29 +143,6 @@ const Chat = () => {
     }
   };
 
-  /* ================= EDIT MESSAGE ================= */
-  const startEdit = (msg) => {
-    setEditingId(msg._id);
-    setEditText(msg.text);
-  };
-
-  const saveEdit = async (id) => {
-    try {
-      const res = await axios.put(
-        `${API}/api/messages/${id}`,
-        { text: editText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      socket.current.emit("messageUpdated", res.data);
-
-      setEditingId(null);
-      setEditText("");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -169,13 +150,13 @@ const Chat = () => {
     }
   };
 
-  const formatTime = (t) =>
-    t
-      ? new Date(t).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "";
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   /* ================= UI ================= */
   return (
@@ -325,29 +306,10 @@ const Chat = () => {
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
-        .message-sender {
-          font-size: 0.7rem;
-          font-weight: 600;
-          margin-bottom: 0.25rem;
-        }
-
-        .message-own .message-sender {
-          text-align: right;
-          color: #dcfce7;
-        }
-
-        .message-other .message-sender {
-          color: #0ea5e9;
-        }
-
         .message-text {
           font-size: 0.95rem;
           line-height: 1.4;
           word-wrap: break-word;
-        }
-
-        .message-other .message-text {
-          color: #1f2937;
         }
 
         .message-time {
@@ -370,41 +332,6 @@ const Chat = () => {
 
         .chat-image:hover {
           transform: scale(1.02);
-        }
-
-        .edit-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 0.65rem;
-          margin-top: 0.5rem;
-          opacity: 0.7;
-          transition: opacity 0.2s;
-          color: inherit;
-        }
-
-        .edit-btn:hover {
-          opacity: 1;
-        }
-
-        .edit-textarea {
-          width: 100%;
-          padding: 0.5rem;
-          border-radius: 0.5rem;
-          border: 1px solid #e5e7eb;
-          font-family: inherit;
-          margin-bottom: 0.5rem;
-          resize: vertical;
-        }
-
-        .save-btn {
-          padding: 0.25rem 0.75rem;
-          background: #22c55e;
-          color: white;
-          border: none;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          font-size: 0.75rem;
         }
 
         .typing-indicator {
@@ -595,41 +522,15 @@ const Chat = () => {
                     className={`message-row ${isOwn ? "message-row-own" : "message-row-other"}`}
                   >
                     <div className={`message-bubble ${isOwn ? "message-own" : "message-other"}`}>
-                      <div className="message-sender">
-                        {msg.sender?.name || "User"} {isOwn && "(You)"}
-                      </div>
-
-                      {editingId === msg._id ? (
-                        <>
-                          <textarea
-                            className="edit-textarea"
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            rows={2}
-                          />
-                          <button className="save-btn" onClick={() => saveEdit(msg._id)}>
-                            ✓ Save
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {msg.text && <div className="message-text">{msg.text}</div>}
-                          {msg.image?.url && (
-                            <img
-                              src={msg.image.url}
-                              alt="chat attachment"
-                              className="chat-image"
-                              onClick={() => window.open(msg.image.url, "_blank")}
-                            />
-                          )}
-                          {isOwn && (
-                            <button className="edit-btn" onClick={() => startEdit(msg)}>
-                              ✏️ Edit
-                            </button>
-                          )}
-                        </>
+                      <div className="message-text">{msg.text}</div>
+                      {msg.image?.url && (
+                        <img
+                          src={msg.image.url}
+                          alt="chat"
+                          className="chat-image"
+                          onClick={() => window.open(msg.image.url, "_blank")}
+                        />
                       )}
-
                       <div className="message-time">{formatTime(msg.createdAt)}</div>
                     </div>
                   </div>

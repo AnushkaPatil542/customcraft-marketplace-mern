@@ -16,6 +16,7 @@ const OrderDetails = () => {
         setOrder(res.data);
       } catch (err) {
         console.error("Error fetching order:", err);
+        setOrder(null);
       } finally {
         setLoading(false);
       }
@@ -23,6 +24,13 @@ const OrderDetails = () => {
 
     fetchOrder();
   }, [id]);
+
+  // ✅ combine all possible image sources
+  const images = [
+    ...(order?.images || []),
+    ...(order?.customerFiles || []),
+    ...(order?.creatorFiles || []),
+  ];
 
   if (loading) {
     return (
@@ -99,7 +107,7 @@ const OrderDetails = () => {
           margin-bottom: 0.5rem;
         }
 
-        .order-header .order-id {
+        .order-id {
           font-size: 0.85rem;
           opacity: 0.9;
         }
@@ -175,12 +183,18 @@ const OrderDetails = () => {
           font-size: 4rem;
         }
 
+        .no-images {
+          text-align: center;
+          color: #6b7280;
+          padding: 2rem;
+        }
+
         @media (max-width: 768px) {
           .order-details-wrapper { padding: 1rem; }
           .order-header h1 { font-size: 1.4rem; }
           .order-body { padding: 1rem; }
-          .grid { gap: 1rem; }
-          .image { height: 160px; }
+          .grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+          .image { height: 150px; }
         }
       `}</style>
 
@@ -190,19 +204,27 @@ const OrderDetails = () => {
             <h1>{order.title}</h1>
             <div className="order-id">Order ID: {order._id?.slice(-8)}</div>
           </div>
+
           <div className="order-body">
-            <div className="grid">
-              {order.images?.map((file, i) => (
-                <div key={i} className="image-wrapper">
-                  <img
-                    src={file}
-                    alt={`Work ${i + 1}`}
-                    className="image"
-                    onClick={() => window.open(file, "_blank")}
-                  />
-                </div>
-              ))}
-            </div>
+            {images.length > 0 ? (
+              <div className="grid">
+                {images.map((file, i) => (
+                  <div key={i} className="image-wrapper">
+                    <img
+                      src={file}
+                      alt={`Work ${i + 1}`}
+                      className="image"
+                      onClick={() => window.open(file, "_blank")}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-images">
+                <span>📷</span>
+                <p>No images available for this order.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -16,7 +16,18 @@ const messageSchema = new mongoose.Schema(
 
     text: {
       type: String,
-      required: true,
+      default: "",   // changed from required → optional (important for images only messages)
+    },
+
+    image: {
+      url: {
+        type: String,
+        default: null,
+      },
+      publicId: {
+        type: String,
+        default: null,
+      },
     },
   },
   { timestamps: true }

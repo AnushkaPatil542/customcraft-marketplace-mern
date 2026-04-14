@@ -144,31 +144,7 @@ router.delete("/:messageId", protect, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.put("/:messageId", protect, async (req, res) => {
-  try {
-    const { text } = req.body;
 
-    const message = await Message.findById(req.params.messageId);
-
-    if (!message) {
-      return res.status(404).json({ message: "Not found" });
-    }
-
-    if (message.sender.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not allowed" });
-    }
-
-    message.text = text;
-    await message.save();
-
-    global.io.to(message.order.toString()).emit("messageUpdated", message);
-
-    res.json(message);
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 router.put("/seen/:orderId", protect, async (req, res) => {
   try {
     await Message.updateMany(

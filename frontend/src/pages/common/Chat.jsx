@@ -13,7 +13,7 @@ const Chat = () => {
   const [preview, setPreview] = useState(null);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
 
-  // ✏️ EDIT STATE
+  // EDIT
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
 
@@ -21,11 +21,9 @@ const Chat = () => {
   const currentUserName = localStorage.getItem("name");
   const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
 
-  const messagesEndRef = useRef(null);
   const socket = useRef(null);
+  const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-
-  const reactions = ["👍", "❤️", "😂", "😮"];
 
   /* ================= SOCKET ================= */
   useEffect(() => {
@@ -52,7 +50,7 @@ const Chat = () => {
     return () => socket.current.disconnect();
   }, [orderId, currentUserId]);
 
-  /* ================= FETCH ================= */
+  /* ================= FETCH MESSAGES ================= */
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -69,7 +67,7 @@ const Chat = () => {
     fetchMessages();
   }, [orderId, token]);
 
-  /* ================= SCROLL ================= */
+  /* ================= AUTO SCROLL ================= */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -78,10 +76,7 @@ const Chat = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
-
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+    if (file) setPreview(URL.createObjectURL(file));
   };
 
   const clearMedia = () => {
@@ -110,7 +105,7 @@ const Chat = () => {
     }, 1000);
   };
 
-  /* ================= SEND ================= */
+  /* ================= SEND MESSAGE ================= */
   const sendMessage = async () => {
     if (!text.trim() && !image) return;
 
@@ -118,11 +113,12 @@ const Chat = () => {
       const formData = new FormData();
       formData.append("orderId", orderId);
       formData.append("text", text);
-
       if (image) formData.append("image", image);
 
       const res = await axios.post(`${API}/api/messages`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       socket.current.emit("sendMessage", {
@@ -143,40 +139,27 @@ const Chat = () => {
     }
   };
 
-  /* ================= EDIT ================= */
+  /* ================= EDIT MESSAGE ================= */
   const startEdit = (msg) => {
     setEditingId(msg._id);
     setEditText(msg.text);
   };
 
   const saveEdit = async (id) => {
-    const res = await axios.put(
-      `${API}/api/messages/${id}`,
-      { text: editText },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    try {
+      const res = await axios.put(
+        `${API}/api/messages/${id}`,
+        { text: editText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    socket.current.emit("sendMessage", {
-      orderId,
-      message: res.data,
-    });
+      socket.current.emit("messageUpdated", res.data);
 
-    setEditingId(null);
-    setEditText("");
-  };
-
-  /* ================= REACTION ================= */
-  const addReaction = async (msgId, emoji) => {
-    const res = await axios.put(
-      `${API}/api/messages/react/${msgId}`,
-      { emoji },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    socket.current.emit("sendMessage", {
-      orderId,
-      message: res.data,
-    });
+      setEditingId(null);
+      setEditText("");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -206,27 +189,15 @@ const Chat = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .chat-wrapper {
-          width: 100vw;
-          min-height: 100vh;
-          padding: 2rem;
           background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
 
         .chat-container {
-          width: 95%;
           max-width: 1000px;
-          height: 85vh;
+          margin: 2rem auto;
           background: white;
           border-radius: 1.5rem;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          display: flex;
-          flex-direction: column;
           overflow: hidden;
           border: 1px solid rgba(34, 197, 94, 0.1);
         }
@@ -240,15 +211,12 @@ const Chat = () => {
         .chat-header h2 {
           font-size: 1.3rem;
           font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
+          margin-bottom: 0.25rem;
         }
 
         .chat-header p {
           font-size: 0.8rem;
           opacity: 0.9;
-          margin-top: 0.25rem;
         }
 
         .online-status {
@@ -273,7 +241,7 @@ const Chat = () => {
         }
 
         .messages-area {
-          flex: 1;
+          height: 60vh;
           overflow-y: auto;
           padding: 1.5rem;
           background: #f9fafb;
@@ -315,7 +283,6 @@ const Chat = () => {
           padding: 0.75rem 1rem;
           border-radius: 1.25rem;
           word-wrap: break-word;
-          position: relative;
         }
 
         .message-own .message-bubble {
@@ -330,22 +297,6 @@ const Chat = () => {
           border: 1px solid #e5e7eb;
           border-bottom-left-radius: 0.25rem;
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .message-sender {
-          font-size: 0.7rem;
-          font-weight: 600;
-          margin-bottom: 0.25rem;
-          margin-left: 0.25rem;
-        }
-
-        .message-own .message-sender {
-          color: #16a34a;
-          text-align: right;
-        }
-
-        .message-other .message-sender {
-          color: #0ea5e9;
         }
 
         .message-text {
@@ -376,31 +327,14 @@ const Chat = () => {
           transform: scale(1.02);
         }
 
-        .reactions {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-        }
-
-        .reaction-btn {
-          cursor: pointer;
-          font-size: 1rem;
-          transition: transform 0.2s ease;
-          background: none;
-          border: none;
-        }
-
-        .reaction-btn:hover {
-          transform: scale(1.2);
-        }
-
         .edit-btn {
           background: none;
           border: none;
           cursor: pointer;
-          font-size: 0.8rem;
-          margin-top: 0.25rem;
+          font-size: 0.7rem;
+          margin-top: 0.5rem;
           opacity: 0.7;
+          color: inherit;
         }
 
         .edit-btn:hover {
@@ -413,11 +347,11 @@ const Chat = () => {
           border-radius: 0.5rem;
           border: 1px solid #e5e7eb;
           font-family: inherit;
+          margin-bottom: 0.5rem;
         }
 
         .save-btn {
-          margin-top: 0.25rem;
-          padding: 0.25rem 0.5rem;
+          padding: 0.25rem 0.75rem;
           background: #22c55e;
           color: white;
           border: none;
@@ -459,9 +393,9 @@ const Chat = () => {
         }
 
         .preview-container {
-          margin-top: 0.5rem;
           position: relative;
           display: inline-block;
+          margin: 0.5rem 1.5rem;
         }
 
         .preview-image {
@@ -497,6 +431,17 @@ const Chat = () => {
           align-items: flex-end;
         }
 
+        .file-label {
+          cursor: pointer;
+          font-size: 1.5rem;
+          padding: 0.5rem;
+          transition: transform 0.2s ease;
+        }
+
+        .file-label:hover {
+          transform: scale(1.1);
+        }
+
         .message-input {
           flex: 1;
           padding: 0.75rem 1rem;
@@ -529,7 +474,7 @@ const Chat = () => {
 
         .send-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(34, 197, Quintal, 0.3);
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
         @keyframes fadeIn {
@@ -538,108 +483,100 @@ const Chat = () => {
         }
 
         @media (max-width: 768px) {
-          .chat-wrapper { padding: 1rem; }
-          .chat-container { width: 100%; height: 90vh; }
+          .chat-container { margin: 1rem; }
           .message { max-width: 85%; }
+          .input-area { padding: 0.75rem 1rem; }
+          .send-btn { padding: 0.75rem 1rem; }
         }
       `}</style>
 
-      <div className="chat-wrapper">
-        <div className="chat-container">
-          <div className="chat-header">
-            <h2>💬 Chat Discussion</h2>
-            <p>Order ID: {orderId}</p>
-            <div className="online-status">
-              <div className="status-dot"></div>
-              <span>Connected • Real-time</span>
-            </div>
+      <div className="chat-container">
+        <div className="chat-header">
+          <h2>💬 Chat Discussion</h2>
+          <p>Order ID: {orderId}</p>
+          <div className="online-status">
+            <div className="status-dot"></div>
+            <span>Connected • Real-time</span>
           </div>
+        </div>
 
-          <div className="messages-area">
-            {messages.map((msg) => {
-              const isOwn = msg.sender?.name === currentUserName;
+        <div className="messages-area">
+          {messages.map((msg) => {
+            const isOwn = msg.sender?.name === currentUserName;
 
-              return (
-                <div key={msg._id} className={`message ${isOwn ? "message-own" : "message-other"}`}>
-                  <div className="message-sender">
-                    {msg.sender?.name || "User"} {isOwn && "(You)"}
-                  </div>
-                  <div className="message-bubble">
-                    {editingId === msg._id ? (
-                      <>
-                        <textarea
-                          className="edit-textarea"
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
+            return (
+              <div
+                key={msg._id}
+                className={`message ${isOwn ? "message-own" : "message-other"}`}
+              >
+                <div className="message-bubble">
+                  {editingId === msg._id ? (
+                    <>
+                      <textarea
+                        className="edit-textarea"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                      />
+                      <button className="save-btn" onClick={() => saveEdit(msg._id)}>
+                        Save
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {msg.text && <div className="message-text">{msg.text}</div>}
+                      {msg.image?.url && (
+                        <img
+                          src={msg.image.url}
+                          alt="chat"
+                          className="chat-image"
+                          onClick={() => window.open(msg.image.url, "_blank")}
                         />
-                        <button className="save-btn" onClick={() => saveEdit(msg._id)}>Save</button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="message-text">{msg.text}</div>
-                        {msg.image?.url && (
-                          <img
-                            src={msg.image.url}
-                            alt="chat"
-                            className="chat-image"
-                            onClick={() => window.open(msg.image.url, "_blank")}
-                          />
-                        )}
-                        <div className="reactions">
-                          {reactions.map((r) => (
-                            <button
-                              key={r}
-                              className="reaction-btn"
-                              onClick={() => addReaction(msg._id, r)}
-                            >
-                              {r}
-                            </button>
-                          ))}
-                        </div>
-                        {msg.sender?.name === currentUserName && (
-                          <button className="edit-btn" onClick={() => startEdit(msg)}>
-                            ✏️ Edit
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div className="message-time">{formatTime(msg.createdAt)}</div>
+                      )}
+                      {isOwn && (
+                        <button className="edit-btn" onClick={() => startEdit(msg)}>
+                          ✏️ Edit
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
-              );
-            })}
-
-            {otherUserTyping && (
-              <div className="typing-indicator">
-                <span>Someone is typing</span>
-                <div className="typing-dots">
-                  <span></span><span></span><span></span>
-                </div>
+                <div className="message-time">{formatTime(msg.createdAt)}</div>
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+            );
+          })}
 
-          {preview && (
-            <div className="preview-container" style={{ margin: "0 1.5rem" }}>
-              <img src={preview} alt="preview" className="preview-image" />
-              <button className="clear-preview" onClick={clearMedia}>×</button>
+          {otherUserTyping && (
+            <div className="typing-indicator">
+              <span>Someone is typing</span>
+              <div className="typing-dots">
+                <span></span><span></span><span></span>
+              </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
+        </div>
 
-          <div className="input-area">
-            <input type="file" onChange={handleImageChange} style={{ display: "none" }} id="file-input" />
-            <label htmlFor="file-input" style={{ cursor: "pointer", fontSize: "1.5rem" }}>📎</label>
-            <textarea
-              className="message-input"
-              value={text}
-              onChange={handleTyping}
-              onKeyDown={handleKeyPress}
-              placeholder="Type your message..."
-              rows={1}
-            />
-            <button className="send-btn" onClick={sendMessage}>Send →</button>
+        {preview && (
+          <div className="preview-container">
+            <img src={preview} alt="preview" className="preview-image" />
+            <button className="clear-preview" onClick={clearMedia}>×</button>
           </div>
+        )}
+
+        <div className="input-area">
+          <label className="file-label" title="Attach image">
+            📎
+            <input type="file" onChange={handleImageChange} style={{ display: "none" }} />
+          </label>
+          <textarea
+            className="message-input"
+            value={text}
+            onChange={handleTyping}
+            onKeyDown={handleKeyPress}
+            placeholder="Type your message..."
+            rows={1}
+          />
+          <button className="send-btn" onClick={sendMessage}>Send →</button>
         </div>
       </div>
     </>

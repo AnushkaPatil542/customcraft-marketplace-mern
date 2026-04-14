@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import API from "../../api";
 
 const OrderDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,22 +24,6 @@ const OrderDetails = () => {
     fetchOrder();
   }, [id]);
 
-  // Helper: get status badge style
-  const getStatusStyle = (status) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
-        return { background: "#fef3c7", color: "#d97706", label: "Pending" };
-      case "assigned":
-        return { background: "#dbeafe", color: "#2563eb", label: "Assigned" };
-      case "in_progress":
-        return { background: "#ede9fe", color: "#7c3aed", label: "In Progress" };
-      case "completed":
-        return { background: "#dcfce7", color: "#16a34a", label: "Completed" };
-      default:
-        return { background: "#f3f4f6", color: "#6b7280", label: status || "Unknown" };
-    }
-  };
-
   if (loading) {
     return (
       <div className="loading-container">
@@ -55,15 +38,10 @@ const OrderDetails = () => {
       <div className="error-container">
         <span className="error-icon">🔍</span>
         <h2>Order not found</h2>
-        <p>The order you're looking for doesn't exist or has been removed.</p>
-        <button className="back-btn-home" onClick={() => navigate("/")}>
-          Go Home
-        </button>
+        <p>The order you're looking for doesn't exist.</p>
       </div>
     );
   }
-
-  const statusStyle = getStatusStyle(order.status);
 
   return (
     <>
@@ -88,7 +66,7 @@ const OrderDetails = () => {
         }
 
         .order-card {
-          max-width: 800px;
+          max-width: 1000px;
           width: 100%;
           background: white;
           border-radius: 2rem;
@@ -127,99 +105,37 @@ const OrderDetails = () => {
         }
 
         .order-body {
-          padding: 1.5rem;
+          padding: 2rem;
         }
 
-        .description {
-          color: #4b5563;
-          line-height: 1.6;
-          margin-bottom: 1.5rem;
-          font-size: 1rem;
-        }
-
-        .section-title {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          color: #1f2937;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .files-grid {
+        .grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-          gap: 1rem;
-          margin-bottom: 1.5rem;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 1.5rem;
         }
 
-        .file-image {
-          width: 100%;
-          height: 150px;
-          object-fit: cover;
+        .image-wrapper {
           border-radius: 1rem;
-          cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          border: 2px solid #e5e7eb;
-        }
-
-        .file-image:hover {
-          transform: scale(1.02);
-          border-color: #22c55e;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 1rem;
-          border-radius: 2rem;
-          font-weight: 600;
-          font-size: 0.85rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .button-group {
-          display: flex;
-          gap: 1rem;
-          margin-top: 0.5rem;
-        }
-
-        .chat-btn {
-          flex: 1;
-          background: linear-gradient(125deg, #8b5cf6, #7c3aed);
-          color: white;
-          border: none;
-          padding: 0.85rem;
-          border-radius: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .chat-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-
-        .back-btn {
-          flex: 1;
-          background: white;
-          color: #6b7280;
-          border: 2px solid #e5e7eb;
-          padding: 0.85rem;
-          border-radius: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .back-btn:hover {
+          overflow: hidden;
           background: #f9fafb;
-          border-color: #22c55e;
-          color: #22c55e;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .image-wrapper:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+
+        .image:hover {
+          transform: scale(1.02);
         }
 
         .loading-container {
@@ -259,23 +175,12 @@ const OrderDetails = () => {
           font-size: 4rem;
         }
 
-        .back-btn-home {
-          background: linear-gradient(125deg, #22c55e, #16a34a);
-          color: white;
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 2rem;
-          cursor: pointer;
-          font-weight: 600;
-          margin-top: 1rem;
-        }
-
         @media (max-width: 768px) {
           .order-details-wrapper { padding: 1rem; }
           .order-header h1 { font-size: 1.4rem; }
-          .button-group { flex-direction: column; }
-          .files-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-          .file-image { height: 120px; }
+          .order-body { padding: 1rem; }
+          .grid { gap: 1rem; }
+          .image { height: 160px; }
         }
       `}</style>
 
@@ -285,40 +190,18 @@ const OrderDetails = () => {
             <h1>{order.title}</h1>
             <div className="order-id">Order ID: {order._id?.slice(-8)}</div>
           </div>
-
           <div className="order-body">
-            <p className="description">{order.description}</p>
-
-            {order.files?.length > 0 && (
-              <>
-                <div className="section-title">
-                  📎 Attached Files ({order.files.length})
+            <div className="grid">
+              {order.files?.map((file, i) => (
+                <div key={i} className="image-wrapper">
+                  <img
+                    src={file}
+                    alt={`Work ${i + 1}`}
+                    className="image"
+                    onClick={() => window.open(file, "_blank")}
+                  />
                 </div>
-                <div className="files-grid">
-                  {order.files.map((file, i) => (
-                    <img
-                      key={i}
-                      src={file}
-                      alt={`Work file ${i + 1}`}
-                      className="file-image"
-                      onClick={() => window.open(file, "_blank")}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div className="status-badge" style={{ background: statusStyle.background, color: statusStyle.color }}>
-              <span>📋</span> {statusStyle.label}
-            </div>
-
-            <div className="button-group">
-              <button className="chat-btn" onClick={() => navigate(`/chat/${order._id}`)}>
-                💬 Chat with Creator
-              </button>
-              <button className="back-btn" onClick={() => navigate(-1)}>
-                🔙 Go Back
-              </button>
+              ))}
             </div>
           </div>
         </div>

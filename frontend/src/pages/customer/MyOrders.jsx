@@ -415,25 +415,7 @@ const MyOrders = () => {
                 </div>
 
                 <p className="order-description">{order.description}</p>
-                {/* CUSTOMER UPLOADED IMAGES */}
-{order.customerFiles?.length > 0 && (
-  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
-    {order.customerFiles.map((file, index) => (
-      <img
-        key={index}
-        src={file}
-        alt="customer upload"
-        style={{
-          width: "120px",
-          height: "120px",
-          objectFit: "cover",
-          borderRadius: "8px",
-          border: "2px solid #ddd",
-        }}
-      />
-    ))}
-  </div>
-)}
+                
 
                 {/* 💰 PAYMENT */}
                 <p className="order-info">

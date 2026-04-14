@@ -7,7 +7,6 @@ const AssignedOrders = () => {
   const [orders, setOrders] = useState([]);
   const [price, setPrice] = useState({});
   const [files, setFiles] = useState({});
-  const [uploading, setUploading] = useState({});
   const [filePreviews, setFilePreviews] = useState({});
   const token = localStorage.getItem("token");
 
@@ -33,13 +32,16 @@ const AssignedOrders = () => {
   /* ================= HANDLE FILE CHANGE ================= */
   const handleFileChange = (e, orderId) => {
     const selected = Array.from(e.target.files);
+
     setFiles((prev) => ({
       ...prev,
       [orderId]: selected,
     }));
 
-    // Create preview URLs
-    const previews = selected.map(file => URL.createObjectURL(file));
+    const previews = selected.map((file) =>
+      URL.createObjectURL(file)
+    );
+
     setFilePreviews((prev) => ({
       ...prev,
       [orderId]: previews,
@@ -50,68 +52,14 @@ const AssignedOrders = () => {
   const removeFile = (orderId, index) => {
     const currentFiles = files[orderId] || [];
     const currentPreviews = filePreviews[orderId] || [];
-    
+
     const newFiles = currentFiles.filter((_, i) => i !== index);
     const newPreviews = currentPreviews.filter((_, i) => i !== index);
-    
-    // Revoke the URL to avoid memory leaks
+
     URL.revokeObjectURL(currentPreviews[index]);
-    
+
     setFiles((prev) => ({ ...prev, [orderId]: newFiles }));
     setFilePreviews((prev) => ({ ...prev, [orderId]: newPreviews }));
-  };
-
-  /* ================= UPLOAD FILES ================= */
-  const uploadFiles = async (orderId) => {
-    try {
-      const selectedFiles = files[orderId];
-
-      if (!selectedFiles || selectedFiles.length === 0) {
-        alert("Please select files first");
-        return;
-      }
-
-      setUploading((prev) => ({ ...prev, [orderId]: true }));
-
-      const formData = new FormData();
-
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const res = await axios.post(
-        `${API}/api/orders/upload/creator/${orderId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // ✅ UPDATE UI WITH NEW FILES
-      setOrders((prev) =>
-        prev.map((o) =>
-          o._id === orderId
-            ? {
-                ...o,
-                files: [...(o.files || []), ...(res.data.fileUrls || [])],
-              }
-            : o
-        )
-      );
-
-      // clear selected files and previews
-      setFiles((prev) => ({ ...prev, [orderId]: [] }));
-      setFilePreviews((prev) => ({ ...prev, [orderId]: [] }));
-
-      alert("✅ Files uploaded successfully");
-    } catch (error) {
-      console.error(error);
-      alert("❌ File upload failed");
-    } finally {
-      setUploading((prev) => ({ ...prev, [orderId]: false }));
-    }
   };
 
   /* ================= UPDATE STATUS ================= */
@@ -142,7 +90,6 @@ const AssignedOrders = () => {
         );
       }
 
-      // update UI
       setOrders((prev) =>
         prev.map((o) =>
           o._id === orderId
@@ -186,8 +133,6 @@ const AssignedOrders = () => {
         }
 
         body {
-          margin: 0;
-          padding: 0;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
@@ -229,11 +174,23 @@ const AssignedOrders = () => {
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
           border: 1px solid rgba(34, 197, 94, 0.1);
+          animation: fadeInUp 0.4s ease-out;
         }
 
         .order-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .order-card h3 {
@@ -255,40 +212,6 @@ const AssignedOrders = () => {
           border-bottom: 1px solid #e5e7eb;
         }
 
-        .uploaded-images {
-          margin: 1rem 0;
-          padding: 0.75rem;
-          background: #f9fafb;
-          border-radius: 0.75rem;
-        }
-
-        .uploaded-images h4 {
-          font-size: 0.85rem;
-          color: #6b7280;
-          margin-bottom: 0.5rem;
-        }
-
-        .images-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-          gap: 0.5rem;
-        }
-
-        .work-image {
-          width: 100%;
-          height: 80px;
-          object-fit: cover;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-          border: 2px solid #e5e7eb;
-        }
-
-        .work-image:hover {
-          transform: scale(1.05);
-          border-color: #22c55e;
-        }
-
         .customer-info {
           background: #f9fafb;
           padding: 0.75rem;
@@ -300,6 +223,10 @@ const AssignedOrders = () => {
           margin: 0.25rem 0;
           color: #374151;
           font-size: 0.9rem;
+        }
+
+        .customer-info strong {
+          color: #1f2937;
         }
 
         .status-badge {
@@ -354,22 +281,25 @@ const AssignedOrders = () => {
         .file-input {
           flex: 1;
           padding: 0.5rem;
-          border: 2px solid #e5e7eb;
+          border: 2px dashed #e5e7eb;
           border-radius: 0.75rem;
           font-size: 0.85rem;
           cursor: pointer;
+          background: #f9fafb;
+          transition: all 0.2s ease;
         }
 
         .file-input:hover {
           border-color: #22c55e;
+          background: #f0fdf4;
         }
 
-        /* File previews */
         .file-previews {
-          margin-top: 0.5rem;
+          width: 100%;
           display: flex;
           flex-wrap: wrap;
           gap: 0.5rem;
+          margin-top: 0.5rem;
         }
 
         .preview-item {
@@ -379,6 +309,11 @@ const AssignedOrders = () => {
           border-radius: 0.5rem;
           overflow: hidden;
           border: 2px solid #e5e7eb;
+          transition: all 0.2s ease;
+        }
+
+        .preview-item:hover {
+          border-color: #ef4444;
         }
 
         .preview-image {
@@ -402,9 +337,15 @@ const AssignedOrders = () => {
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all 0.2s ease;
         }
 
-        .start-btn, .upload-btn, .complete-btn {
+        .remove-file:hover {
+          transform: scale(1.1);
+          background: #dc2626;
+        }
+
+        .start-btn, .complete-btn {
           flex: 1;
           padding: 0.6rem 1rem;
           border: none;
@@ -419,24 +360,13 @@ const AssignedOrders = () => {
           color: white;
         }
 
-        .start-btn:hover, .upload-btn:hover, .complete-btn:hover {
+        .start-btn:hover, .complete-btn:hover {
           transform: translateY(-2px);
-        }
-
-        .upload-btn {
-          background: linear-gradient(125deg, #0ea5e9, #0284c7);
-          color: white;
         }
 
         .complete-btn {
           background: linear-gradient(125deg, #eab308, #ca8a04);
           color: white;
-        }
-
-        .upload-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-          transform: none;
         }
 
         .no-orders {
@@ -446,27 +376,21 @@ const AssignedOrders = () => {
           border-radius: 1rem;
           color: #6b7280;
           font-size: 1.1rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .spinner-small {
-          display: inline-block;
-          width: 14px;
-          height: 14px;
-          border: 2px solid white;
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.6s linear infinite;
-          margin-right: 6px;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        @media (max-width: 1024px) {
+          .assigned-wrapper { padding: 1.5rem; }
+          .assigned-container h2 { font-size: 2rem; }
+          .orders-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         }
 
         @media (max-width: 768px) {
           .assigned-wrapper { padding: 1rem; }
           .assigned-container h2 { font-size: 1.8rem; }
           .orders-grid { grid-template-columns: 1fr; }
+          .order-card { padding: 1rem; }
+          .order-card h3 { font-size: 1.1rem; }
           .action-buttons { flex-direction: column; }
           .price-input, .file-input { width: 100%; }
         }
@@ -488,28 +412,11 @@ const AssignedOrders = () => {
             <div className="orders-grid">
               {orders.map((order) => {
                 const statusStyle = getStatusStyle(order.status);
+
                 return (
                   <div key={order._id} className="order-card">
                     <h3>{order.title}</h3>
                     <p className="order-description">{order.description}</p>
-
-                    {/* SHOW UPLOADED FILES */}
-                    {order.files?.length > 0 && (
-                      <div className="uploaded-images">
-                        <h4>📷 Uploaded Work</h4>
-                        <div className="images-grid">
-                          {order.files.map((file, i) => (
-                            <img
-                              key={i}
-                              src={file}
-                              alt="work"
-                              className="work-image"
-                              onClick={() => window.open(file, "_blank")}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     <div className="customer-info">
                       <p><strong>👤 Customer:</strong> {order.customer?.name}</p>
@@ -521,14 +428,22 @@ const AssignedOrders = () => {
                     </span>
 
                     {order.status !== "PENDING" && (
-                      <button className="chat-btn" onClick={() => navigate(`/chat/${order._id}`)}>
+                      <button
+                        className="chat-btn"
+                        onClick={() => navigate(`/chat/${order._id}`)}
+                      >
                         💬 Chat with Customer
                       </button>
                     )}
 
                     <div className="action-buttons">
                       {order.status === "ASSIGNED" && (
-                        <button className="start-btn" onClick={() => updateStatus(order._id, "IN_PROGRESS")}>
+                        <button
+                          className="start-btn"
+                          onClick={() =>
+                            updateStatus(order._id, "IN_PROGRESS")
+                          }
+                        >
                           🚀 Start Order
                         </button>
                       )}
@@ -539,38 +454,54 @@ const AssignedOrders = () => {
                             type="number"
                             placeholder="💰 Enter price ₹"
                             value={price[order._id] || ""}
-                            onChange={(e) => setPrice({ ...price, [order._id]: e.target.value })}
+                            onChange={(e) =>
+                              setPrice({
+                                ...price,
+                                [order._id]: e.target.value,
+                              })
+                            }
                             className="price-input"
                           />
 
                           <input
                             type="file"
                             multiple
-                            onChange={(e) => handleFileChange(e, order._id)}
+                            onChange={(e) =>
+                              handleFileChange(e, order._id)
+                            }
                             className="file-input"
                           />
 
-                          {/* File previews */}
                           {filePreviews[order._id]?.length > 0 && (
                             <div className="file-previews">
-                              {filePreviews[order._id].map((preview, idx) => (
-                                <div key={idx} className="preview-item">
-                                  <img src={preview} alt="preview" className="preview-image" />
-                                  <button className="remove-file" onClick={() => removeFile(order._id, idx)}>×</button>
-                                </div>
-                              ))}
+                              {filePreviews[order._id].map(
+                                (preview, idx) => (
+                                  <div key={idx} className="preview-item">
+                                    <img
+                                      src={preview}
+                                      alt="preview"
+                                      className="preview-image"
+                                    />
+                                    <button
+                                      className="remove-file"
+                                      onClick={() =>
+                                        removeFile(order._id, idx)
+                                      }
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                )
+                              )}
                             </div>
                           )}
 
-                          <button className="upload-btn" onClick={() => uploadFiles(order._id)} disabled={uploading[order._id]}>
-                            {uploading[order._id] ? (
-                              <><span className="spinner-small"></span> Uploading...</>
-                            ) : (
-                              "📁 Upload Work"
-                            )}
-                          </button>
-
-                          <button className="complete-btn" onClick={() => updateStatus(order._id, "COMPLETED")}>
+                          <button
+                            className="complete-btn"
+                            onClick={() =>
+                              updateStatus(order._id, "COMPLETED")
+                            }
+                          >
                             ✅ Complete Order
                           </button>
                         </>

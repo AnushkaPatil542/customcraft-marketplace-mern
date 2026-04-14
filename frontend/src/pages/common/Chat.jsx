@@ -189,36 +189,35 @@ const Chat = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
         }
 
-        /* Main Wrapper - Centered */
         .chat-wrapper {
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 1.5rem;
+          padding: 2rem;
         }
 
-        /* Chat Container - Centered */
         .chat-container {
           width: 100%;
-          max-width: 1100px;
+          max-width: 1000px;
           height: 85vh;
           background: white;
-          border-radius: 2rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          border-radius: 1.5rem;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          animation: slideUp 0.4s ease;
+          border: 1px solid rgba(34, 197, 94, 0.1);
+          animation: fadeInUp 0.5s ease;
         }
 
-        @keyframes slideUp {
+        @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
@@ -226,15 +225,14 @@ const Chat = () => {
           }
         }
 
-        /* Header */
         .chat-header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 1.25rem 2rem;
+          background: linear-gradient(125deg, #22c55e, #16a34a);
+          padding: 1.25rem 1.5rem;
           color: white;
         }
 
         .chat-header h2 {
-          font-size: 1.4rem;
+          font-size: 1.3rem;
           font-weight: 600;
           display: flex;
           align-items: center;
@@ -243,7 +241,7 @@ const Chat = () => {
 
         .chat-header p {
           font-size: 0.8rem;
-          opacity: 0.85;
+          opacity: 0.9;
           margin-top: 0.25rem;
         }
 
@@ -253,9 +251,6 @@ const Chat = () => {
           gap: 0.5rem;
           font-size: 0.7rem;
           margin-top: 0.5rem;
-          background: rgba(255,255,255,0.2);
-          padding: 0.25rem 0.75rem;
-          border-radius: 2rem;
         }
 
         .status-dot {
@@ -271,33 +266,30 @@ const Chat = () => {
           50% { opacity: 0.5; transform: scale(0.8); }
         }
 
-        /* Messages Area */
         .messages-area {
           flex: 1;
           overflow-y: auto;
-          padding: 1.5rem 2rem;
-          background: #f8fafc;
+          padding: 1.5rem;
+          background: #f9fafb;
           display: flex;
           flex-direction: column;
           gap: 1rem;
         }
 
-        /* Custom Scrollbar */
         .messages-area::-webkit-scrollbar {
           width: 6px;
         }
 
         .messages-area::-webkit-scrollbar-track {
-          background: #e2e8f0;
+          background: #e5e7eb;
           border-radius: 3px;
         }
 
         .messages-area::-webkit-scrollbar-thumb {
-          background: #a78bfa;
+          background: #22c55e;
           border-radius: 3px;
         }
 
-        /* Message Row */
         .message-row {
           display: flex;
           width: 100%;
@@ -312,50 +304,54 @@ const Chat = () => {
           justify-content: flex-start;
         }
 
-        /* Message Bubble */
         .message-bubble {
-          max-width: 65%;
+          max-width: 70%;
           padding: 0.75rem 1rem;
           border-radius: 1.25rem;
           position: relative;
         }
 
         .message-own .message-bubble {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border-bottom-right-radius: 0.25rem;
         }
 
         .message-other .message-bubble {
           background: white;
-          color: #1e293b;
-          border: 1px solid #e2e8f0;
+          color: #1f2937;
+          border: 1px solid #e5e7eb;
           border-bottom-left-radius: 0.25rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Sender Name */
         .message-sender {
           font-size: 0.7rem;
           font-weight: 600;
           margin-bottom: 0.25rem;
-          opacity: 0.8;
         }
 
         .message-own .message-sender {
           text-align: right;
+          color: #dcfce7;
         }
 
-        /* Message Text */
+        .message-other .message-sender {
+          color: #0ea5e9;
+        }
+
         .message-text {
           font-size: 0.95rem;
           line-height: 1.4;
           word-wrap: break-word;
         }
 
-        /* Message Time */
+        .message-other .message-text {
+          color: #1f2937;
+        }
+
         .message-time {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           margin-top: 0.25rem;
           opacity: 0.7;
         }
@@ -364,11 +360,10 @@ const Chat = () => {
           text-align: right;
         }
 
-        /* Chat Image */
         .chat-image {
           max-width: 200px;
           margin-top: 0.5rem;
-          border-radius: 0.75rem;
+          border-radius: 0.5rem;
           cursor: pointer;
           transition: transform 0.2s ease;
         }
@@ -377,14 +372,13 @@ const Chat = () => {
           transform: scale(1.02);
         }
 
-        /* Edit Button */
         .edit-btn {
           background: none;
           border: none;
           cursor: pointer;
           font-size: 0.65rem;
           margin-top: 0.5rem;
-          opacity: 0.6;
+          opacity: 0.7;
           transition: opacity 0.2s;
           color: inherit;
         }
@@ -393,12 +387,11 @@ const Chat = () => {
           opacity: 1;
         }
 
-        /* Edit Mode */
         .edit-textarea {
           width: 100%;
           padding: 0.5rem;
           border-radius: 0.5rem;
-          border: 1px solid #e2e8f0;
+          border: 1px solid #e5e7eb;
           font-family: inherit;
           margin-bottom: 0.5rem;
           resize: vertical;
@@ -414,17 +407,16 @@ const Chat = () => {
           font-size: 0.75rem;
         }
 
-        /* Typing Indicator */
         .typing-indicator {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
           background: white;
-          border-radius: 1.5rem;
+          border-radius: 1rem;
           width: fit-content;
-          border: 1px solid #e2e8f0;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          border: 1px solid #e5e7eb;
+          animation: fadeIn 0.3s ease;
         }
 
         .typing-dots {
@@ -435,7 +427,7 @@ const Chat = () => {
         .typing-dots span {
           width: 6px;
           height: 6px;
-          background: #a78bfa;
+          background: #22c55e;
           border-radius: 50%;
           animation: typingBounce 1.4s infinite;
         }
@@ -448,14 +440,13 @@ const Chat = () => {
           30% { transform: translateY(-6px); }
         }
 
-        /* Preview Container */
         .preview-container {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           padding: 0.75rem 1.5rem;
           background: #f1f5f9;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid #e5e7eb;
         }
 
         .preview-image {
@@ -463,7 +454,7 @@ const Chat = () => {
           height: 60px;
           object-fit: cover;
           border-radius: 0.5rem;
-          border: 2px solid #a78bfa;
+          border: 2px solid #22c55e;
         }
 
         .clear-preview {
@@ -485,11 +476,10 @@ const Chat = () => {
           transform: scale(1.1);
         }
 
-        /* Input Area */
         .input-area {
           padding: 1rem 1.5rem;
           background: white;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid #e5e7eb;
           display: flex;
           gap: 0.75rem;
           align-items: flex-end;
@@ -517,29 +507,33 @@ const Chat = () => {
         .message-input {
           flex: 1;
           padding: 0.85rem 1rem;
-          border: 2px solid #e2e8f0;
-          border-radius: 1.5rem;
+          border: 2px solid #e5e7eb;
+          border-radius: 1rem;
           font-size: 0.95rem;
           font-family: inherit;
           resize: none;
           transition: all 0.2s ease;
-          background: #f8fafc;
-          color: #1e293b;
+          background: #ffffff;
+          color: #1f2937;
         }
 
         .message-input:focus {
           outline: none;
-          border-color: #a78bfa;
+          border-color: #22c55e;
           background: white;
-          box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .message-input::placeholder {
+          color: #9ca3af;
         }
 
         .send-btn {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border: none;
           padding: 0.85rem 1.5rem;
-          border-radius: 1.5rem;
+          border-radius: 1rem;
           cursor: pointer;
           font-weight: 600;
           transition: all 0.2s ease;
@@ -547,10 +541,9 @@ const Chat = () => {
 
         .send-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
-        /* No Messages */
         .no-messages {
           text-align: center;
           padding: 3rem;
@@ -562,10 +555,9 @@ const Chat = () => {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-          .chat-wrapper { padding: 0.5rem; }
-          .chat-container { height: 95vh; border-radius: 1rem; }
+          .chat-wrapper { padding: 1rem; }
+          .chat-container { height: 90vh; }
           .message-bubble { max-width: 85%; }
           .chat-header { padding: 1rem; }
           .messages-area { padding: 1rem; }
@@ -578,18 +570,18 @@ const Chat = () => {
       <div className="chat-wrapper">
         <div className="chat-container">
           <div className="chat-header">
-            <h2>💬 Real-time Chat</h2>
-            <p>Order #{orderId?.slice(-8)}</p>
+            <h2>💬 Chat Discussion</h2>
+            <p>Order ID: {orderId}</p>
             <div className="online-status">
               <div className="status-dot"></div>
-              <span>Live • Real-time messaging</span>
+              <span>Connected • Real-time</span>
             </div>
           </div>
 
           <div className="messages-area">
             {messages.length === 0 ? (
               <div className="no-messages">
-                <span style={{ fontSize: "3rem" }}>💬</span>
+                <span style={{ fontSize: "2rem" }}>💬</span>
                 <p>No messages yet</p>
                 <p style={{ fontSize: "0.8rem" }}>Start the conversation!</p>
               </div>

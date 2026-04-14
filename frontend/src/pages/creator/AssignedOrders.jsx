@@ -29,25 +29,7 @@ const AssignedOrders = () => {
     if (token) fetchAssignedOrders();
   }, [token]);
 
-  /* ================= HANDLE FILE CHANGE ================= */
-  const handleFileChange = (e, orderId) => {
-    const selected = Array.from(e.target.files);
-
-    setFiles((prev) => ({
-      ...prev,
-      [orderId]: selected,
-    }));
-
-    const previews = selected.map((file) =>
-      URL.createObjectURL(file)
-    );
-
-    setFilePreviews((prev) => ({
-      ...prev,
-      [orderId]: previews,
-    }));
-  };
-
+  
   /* ================= REMOVE FILE ================= */
   const removeFile = (orderId, index) => {
     const currentFiles = files[orderId] || [];
@@ -278,22 +260,6 @@ const AssignedOrders = () => {
           box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
         }
 
-        .file-input {
-          flex: 1;
-          padding: 0.5rem;
-          border: 2px dashed #e5e7eb;
-          border-radius: 0.75rem;
-          font-size: 0.85rem;
-          cursor: pointer;
-          background: #f9fafb;
-          transition: all 0.2s ease;
-        }
-
-        .file-input:hover {
-          border-color: #22c55e;
-          background: #f0fdf4;
-        }
-
         .file-previews {
           width: 100%;
           display: flex;
@@ -392,7 +358,7 @@ const AssignedOrders = () => {
           .order-card { padding: 1rem; }
           .order-card h3 { font-size: 1.1rem; }
           .action-buttons { flex-direction: column; }
-          .price-input, .file-input { width: 100%; }
+          .price-input { width: 100%; }
         }
       `}</style>
 
@@ -463,14 +429,7 @@ const AssignedOrders = () => {
                             className="price-input"
                           />
 
-                          <input
-                            type="file"
-                            multiple
-                            onChange={(e) =>
-                              handleFileChange(e, order._id)
-                            }
-                            className="file-input"
-                          />
+                          {/* FILE INPUT BUTTON REMOVED */}
 
                           {filePreviews[order._id]?.length > 0 && (
                             <div className="file-previews">

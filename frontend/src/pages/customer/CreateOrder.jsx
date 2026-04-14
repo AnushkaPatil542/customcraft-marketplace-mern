@@ -260,6 +260,8 @@ function CreateOrder() {
               required
             />
 
+            {/* FILE INPUT BUTTON REMOVED */}
+
             <button type="submit" disabled={loading}>
               {loading ? (
                 <>

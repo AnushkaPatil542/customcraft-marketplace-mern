@@ -111,7 +111,7 @@ const Chat = () => {
 
       const newMessage = res.data;
 
-      // instant UI update (IMPORTANT FIX)
+      // instant UI update
       setMessages((prev) => [...prev, newMessage]);
 
       socket.current.emit("sendMessage", {
@@ -162,7 +162,7 @@ const Chat = () => {
           background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
         }
 
-        /* CENTER FIX - FULL SCREEN CENTERING */
+        /* CENTER FIX - SQUARE SHAPE */
         .chat-wrapper {
           width: 100vw;
           min-height: 100vh;
@@ -174,8 +174,9 @@ const Chat = () => {
 
         .chat-container {
           width: 100%;
-          max-width: 900px;
-          height: 85vh;
+          max-width: 700px;
+          height: 700px;
+          max-height: 85vh;
           background: white;
           border-radius: 24px;
           display: flex;
@@ -184,6 +185,15 @@ const Chat = () => {
           overflow: hidden;
           border: 1px solid rgba(34, 197, 94, 0.1);
           animation: fadeInUp 0.4s ease;
+          aspect-ratio: 1 / 1;
+        }
+
+        @media (max-width: 768px) {
+          .chat-container {
+            height: auto;
+            aspect-ratio: auto;
+            max-height: 90vh;
+          }
         }
 
         @keyframes fadeInUp {
@@ -199,18 +209,18 @@ const Chat = () => {
 
         .chat-header {
           background: linear-gradient(125deg, #22c55e, #16a34a);
-          padding: 1.25rem 1.5rem;
+          padding: 1rem 1.25rem;
           color: white;
         }
 
         .chat-header h3 {
-          font-size: 1.3rem;
+          font-size: 1.2rem;
           font-weight: 600;
           margin-bottom: 0.25rem;
         }
 
         .chat-header small {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           opacity: 0.9;
         }
 
@@ -218,16 +228,16 @@ const Chat = () => {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          font-size: 0.7rem;
-          margin-top: 0.5rem;
+          font-size: 0.65rem;
+          margin-top: 0.4rem;
           background: rgba(255,255,255,0.2);
-          padding: 0.25rem 0.75rem;
+          padding: 0.2rem 0.6rem;
           border-radius: 2rem;
         }
 
         .status-dot {
-          width: 8px;
-          height: 8px;
+          width: 7px;
+          height: 7px;
           background: #4ade80;
           border-radius: 50%;
           animation: pulse 1.5s infinite;
@@ -240,7 +250,7 @@ const Chat = () => {
 
         .messages-area {
           flex: 1;
-          padding: 1.5rem;
+          padding: 1rem;
           overflow-y: auto;
           background: #f9fafb;
           display: flex;
@@ -249,7 +259,7 @@ const Chat = () => {
         }
 
         .messages-area::-webkit-scrollbar {
-          width: 6px;
+          width: 5px;
         }
 
         .messages-area::-webkit-scrollbar-track {
@@ -278,34 +288,34 @@ const Chat = () => {
 
         .bubble {
           max-width: 70%;
-          padding: 0.75rem 1rem;
-          border-radius: 1.25rem;
+          padding: 0.6rem 0.9rem;
+          border-radius: 1rem;
           position: relative;
         }
 
         .message-own .bubble {
           background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
-          border-bottom-right-radius: 0.25rem;
+          border-bottom-right-radius: 0.2rem;
         }
 
         .message-other .bubble {
           background: white;
           color: #1f2937;
           border: 1px solid #e5e7eb;
-          border-bottom-left-radius: 0.25rem;
+          border-bottom-left-radius: 0.2rem;
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .message-text {
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           line-height: 1.4;
           word-wrap: break-word;
         }
 
         .chat-image {
-          max-width: 200px;
-          margin-top: 0.5rem;
+          max-width: 180px;
+          margin-top: 0.4rem;
           border-radius: 0.5rem;
           cursor: pointer;
           transition: transform 0.2s ease;
@@ -316,8 +326,8 @@ const Chat = () => {
         }
 
         .message-time {
-          font-size: 0.65rem;
-          margin-top: 0.25rem;
+          font-size: 0.6rem;
+          margin-top: 0.2rem;
           opacity: 0.7;
         }
 
@@ -329,7 +339,7 @@ const Chat = () => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.5rem 1rem;
+          padding: 0.4rem 0.8rem;
           background: white;
           border-radius: 1rem;
           width: fit-content;
@@ -339,12 +349,12 @@ const Chat = () => {
 
         .typing-dots {
           display: flex;
-          gap: 0.25rem;
+          gap: 0.2rem;
         }
 
         .typing-dots span {
-          width: 6px;
-          height: 6px;
+          width: 5px;
+          height: 5px;
           background: #22c55e;
           border-radius: 50%;
           animation: typingBounce 1.4s infinite;
@@ -355,21 +365,21 @@ const Chat = () => {
 
         @keyframes typingBounce {
           0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
+          30% { transform: translateY(-5px); }
         }
 
         .preview-container {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.75rem 1.5rem;
+          gap: 0.6rem;
+          padding: 0.6rem 1rem;
           background: #f1f5f9;
           border-top: 1px solid #e5e7eb;
         }
 
         .preview-image {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           object-fit: cover;
           border-radius: 0.5rem;
           border: 2px solid #22c55e;
@@ -380,10 +390,10 @@ const Chat = () => {
           color: white;
           border: none;
           border-radius: 50%;
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
           cursor: pointer;
-          font-size: 14px;
+          font-size: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -396,8 +406,8 @@ const Chat = () => {
 
         .input-area {
           display: flex;
-          padding: 1rem 1.5rem;
-          gap: 0.75rem;
+          padding: 0.8rem 1rem;
+          gap: 0.6rem;
           border-top: 1px solid #e5e7eb;
           background: white;
           align-items: flex-end;
@@ -405,13 +415,13 @@ const Chat = () => {
 
         .file-label {
           cursor: pointer;
-          font-size: 1.5rem;
-          padding: 0.5rem;
+          font-size: 1.3rem;
+          padding: 0.4rem;
           transition: all 0.2s;
           background: #f1f5f9;
           border-radius: 50%;
-          width: 44px;
-          height: 44px;
+          width: 38px;
+          height: 38px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -424,10 +434,10 @@ const Chat = () => {
 
         textarea {
           flex: 1;
-          padding: 0.85rem 1rem;
+          padding: 0.7rem 0.9rem;
           border: 2px solid #e5e7eb;
           border-radius: 1rem;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           font-family: inherit;
           resize: none;
           transition: all 0.2s ease;
@@ -449,7 +459,7 @@ const Chat = () => {
           background: linear-gradient(125deg, #22c55e, #16a34a);
           color: white;
           border: none;
-          padding: 0.85rem 1.5rem;
+          padding: 0.7rem 1.2rem;
           border-radius: 1rem;
           cursor: pointer;
           font-weight: 600;
@@ -463,24 +473,13 @@ const Chat = () => {
 
         .no-messages {
           text-align: center;
-          padding: 3rem;
+          padding: 2rem;
           color: #94a3b8;
         }
 
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-          .chat-wrapper { padding: 10px; }
-          .chat-container { height: 95vh; border-radius: 16px; }
-          .bubble { max-width: 85%; }
-          .chat-header { padding: 1rem; }
-          .messages-area { padding: 1rem; }
-          .input-area { padding: 0.75rem 1rem; gap: 0.5rem; }
-          button { padding: 0.75rem 1rem; }
-          .file-label { width: 36px; height: 36px; font-size: 1.2rem; }
         }
       `}</style>
 
@@ -498,9 +497,9 @@ const Chat = () => {
           <div className="messages-area">
             {messages.length === 0 ? (
               <div className="no-messages">
-                <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>💬</span>
+                <span style={{ fontSize: "1.8rem", display: "block", marginBottom: "0.5rem" }}>💬</span>
                 <p>No messages yet</p>
-                <p style={{ fontSize: "0.8rem" }}>Start the conversation!</p>
+                <p style={{ fontSize: "0.75rem" }}>Start the conversation!</p>
               </div>
             ) : (
               messages.map((msg) => {

@@ -26,7 +26,9 @@ const CreatorEarnings = () => {
   // ✅ SOCIAL SHARE LOGIC - Enhanced with multiple platforms
   const shareWork = (order, platform) => {
     const text = `✨ Check out my custom design: ${order.title} 🚀 I completed this project on CustomCraft!`;
-    const url = `http://localhost:5173/order/${order._id}`;
+    const url = `https://customcraft-marketplace-mern.vercel.app/order/${order._Id}`;
+
+
     
     let shareUrl = "";
     

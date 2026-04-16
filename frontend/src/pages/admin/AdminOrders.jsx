@@ -125,88 +125,161 @@ function AdminOrders() {
   return (
     <>
       <style>{`
-        body{
-          margin:0;
-          font-family:Arial, sans-serif;
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
         }
 
-        .wrapper{
-          min-height:100vh;
-          padding:30px;
-          background:linear-gradient(135deg,#f0fdf4,#e0f2fe,#fef3c7);
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
         }
 
-        .container{
-          max-width:1200px;
-          margin:auto;
+        .wrapper {
+          width: 100vw;
+          min-height: 100vh;
+          padding: 2rem;
+          background: linear-gradient(125deg, #f0fdf4 0%, #dcfce7 25%, #e0f2fe 50%, #fef3c7 100%);
         }
 
-        .title{
-          font-size:32px;
-          font-weight:bold;
-          margin-bottom:25px;
+        .container {
+          width: 100%;
+          margin: 0 auto;
         }
 
-        .grid{
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
-          gap:20px;
+        .title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 2rem;
+          background: linear-gradient(125deg, #22c55e, #0ea5e9, #eab308);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          letter-spacing: -0.02em;
         }
 
-        .card{
-          background:white;
-          padding:20px;
-          border-radius:16px;
-          box-shadow:0 10px 25px rgba(0,0,0,0.08);
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+          gap: 1.5rem;
         }
 
-        .header{
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:15px;
+        .card {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 1.5rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          border: 1px solid rgba(34, 197, 94, 0.1);
+          animation: fadeInUp 0.4s ease-out;
         }
 
-        .badge{
-          padding:6px 12px;
-          border-radius:20px;
-          font-size:12px;
-          font-weight:bold;
+        .card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
         }
 
-        .line{
-          margin:8px 0;
-          color:#333;
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
-        select{
-          width:100%;
-          padding:10px;
-          margin-top:15px;
-          border-radius:10px;
-          border:1px solid #ddd;
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 2px solid #e5e7eb;
         }
 
-        button{
-          width:100%;
-          margin-top:15px;
-          padding:12px;
-          border:none;
-          border-radius:10px;
-          background:#22c55e;
-          color:white;
-          font-weight:bold;
-          cursor:pointer;
+        .header h3 {
+          font-size: 1.2rem;
+          font-weight: 700;
+          background: linear-gradient(125deg, #22c55e, #0ea5e9);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
         }
 
-        button:hover{
-          opacity:0.9;
+        .badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 2rem;
+          font-size: 0.75rem;
+          font-weight: 600;
         }
 
-        .loading{
-          text-align:center;
-          font-size:20px;
-          padding:80px;
+        .line {
+          margin: 0.75rem 0;
+          color: #374151;
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+
+        .line b {
+          color: #1f2937;
+        }
+
+        select {
+          width: 100%;
+          padding: 0.75rem;
+          margin-top: 1rem;
+          border-radius: 0.75rem;
+          border: 2px solid #e5e7eb;
+          background: #f9fafb;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        select:focus {
+          outline: none;
+          border-color: #22c55e;
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        button {
+          width: 100%;
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: linear-gradient(125deg, #22c55e, #16a34a);
+          color: white;
+          border: none;
+          border-radius: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .loading {
+          text-align: center;
+          font-size: 1.2rem;
+          padding: 3rem;
+          background: white;
+          border-radius: 1rem;
+          color: #6b7280;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+          .wrapper { padding: 1rem; }
+          .title { font-size: 1.8rem; }
+          .grid { grid-template-columns: 1fr; }
+          .card { padding: 1rem; }
+          .header h3 { font-size: 1rem; }
         }
       `}</style>
 
@@ -215,7 +288,7 @@ function AdminOrders() {
           <div className="title">📋 Manage Orders</div>
 
           {loading ? (
-            <div className="loading">Loading...</div>
+            <div className="loading">Loading orders...</div>
           ) : (
             <div className="grid">
               {orders.map((order) => (

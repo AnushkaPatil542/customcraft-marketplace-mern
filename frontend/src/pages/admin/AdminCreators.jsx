@@ -324,11 +324,10 @@ function AdminCreators() {
                               {item.images.map((img, i) => (
                                 <img
                                   key={i}
-                                  src={`${API}/${img.replace(/\\/g, "/")}`}
+src={img}
                                   alt={item.title}
                                   className="portfolio-img"
-                                  onClick={() => window.open(`${API}/${img.replace(/\\/g, "/")}`, '_blank')}
-                                />
+onClick={() => window.open(img, "_blank")}                                />
                               ))}
                             </div>
                           </div>

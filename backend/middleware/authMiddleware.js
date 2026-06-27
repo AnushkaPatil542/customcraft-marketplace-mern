@@ -51,17 +51,20 @@ const protect = async (req, res, next) => {
 // 👑 ADMIN ONLY
 const adminOnly = (req, res, next) => {
   try {
-    if (!req.user || req.user.role !== "admin") {
+    if (!req.user || req.user.role !== "ADMIN") {
       return res.status(403).json({
         message: "Access denied. Admins only.",
       });
     }
+
     next();
+
   } catch (error) {
-    return res.status(500).json({ message: "Role check failed" });
+    return res.status(500).json({
+      message: "Role check failed",
+    });
   }
 };
-
 // 🎨 CREATOR ONLY
 const creatorOnly = (req, res, next) => {
   try {

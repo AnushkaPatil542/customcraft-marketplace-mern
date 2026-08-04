@@ -149,8 +149,8 @@ function Login() {
         /* Error message */
         .error-message {
           background: #fef2f2 !important;
-          border-left-color: #ef4444 !important;
-          color: #991b1b !important;
+          border-left-color: #f37373 !important;
+          color: #e59c9c !important;
         }
 
         /* Form layout */
@@ -170,7 +170,7 @@ function Login() {
           display: block;
           font-weight: 600;
           margin-bottom: 0.5rem;
-          color: #1f2937;
+          color: #256ccf;
           font-size: 0.9rem;
         }
 
@@ -248,14 +248,14 @@ function Login() {
           background: none;
           border-left: none;
           padding: 0;
-          color: #6b7280;
+          color: #8b96ac;
           font-size: 0.9rem;
         }
 
         .register-section button {
           background: none;
           border: none;
-          color: #22c55e;
+          color: #345741;
           font-weight: 700;
           font-size: 0.9rem;
           cursor: pointer;
